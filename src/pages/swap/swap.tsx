@@ -1,7 +1,7 @@
 import React from 'react';
 import {Numbers} from '../../common';
 import {Button} from '../../components/button';
-import {PoolShare} from '../../components/pool-share';
+import {PoolShare} from '../../components/pool';
 import {TokenInput} from '../../components/token-input';
 
 interface Token {

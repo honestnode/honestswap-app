@@ -1,6 +1,6 @@
 import React from 'react';
 import {Button} from '../../components/button';
-import {PoolShare} from '../../components/pool-share';
+import {PoolShare} from '../../components/pool';
 import {TokenInput} from '../../components/token-input';
 import {Essential} from './essential';
 

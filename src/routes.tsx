@@ -10,7 +10,7 @@ export interface Route {
 }
 
 export const routes: Route[] = [
-  {path: '/', title: 'Overview', component: Overview, exact: true, navigator: true},
+  {path: '/', title: 'Home', component: Overview, exact: true, navigator: true},
   {path: '/mint', title: 'Mint', component: Mint, navigator: true},
   {path: '/save', title: 'Save', component: Save, navigator: true},
   {path: '/swap', title: 'Swap', component: Swap, navigator: true},
