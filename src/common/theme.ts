@@ -20,7 +20,7 @@ export const theme: HonestTheme = {
   spacing: (unit = 1) => 4 * unit,
   palette: {
     border: '#d0d0d0',
-    textDarker: '#252525',
+    textDarker: '#404040',
     text: '#808080',
     textLighter: '#a0a0a0'
   },

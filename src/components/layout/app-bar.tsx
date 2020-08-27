@@ -13,7 +13,8 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
     alignItems: 'center',
     justifyContent: 'center',
     fontSize: '30px',
-    textTransform: 'uppercase'
+    textTransform: 'uppercase',
+    color: theme.palette.textDarker
   },
   account: {
     position: 'absolute',
