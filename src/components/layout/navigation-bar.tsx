@@ -1,46 +1,36 @@
 import React from 'react';
 import {createUseStyles} from 'react-jss';
-import { useHistory } from 'react-router-dom';
 import {HonestTheme} from '../../common/theme';
-
-export interface Navigation {
-  path: string;
-  title: string;
-}
+import {NavigationItem, NavigationItemProps} from './navigation-item';
 
 export interface NavigationBarProps {
-  items: Navigation[]
+  items: NavigationItemProps[]
 }
 
-export const NavigationBar: React.FC<NavigationBarProps> = (props) => {
-  const {items} = props;
-  return (
-    <nav>
-      {items.map(item => <NavigationItem key={item.path} path={item.path} title={item.title} />)}
-    </nav>
-  );
-};
-
-type NavigationItemProps = Navigation;
-
-const useItemStyles = createUseStyles<HonestTheme>(theme => ({
+const useStyles = createUseStyles<HonestTheme>(theme => ({
   root: {
-    marginRight: theme.spacing(2),
-    textDecoration: 'underline',
-    cursor: 'pointer',
+    borderStyle: 'solid',
+    borderColor: theme.palette.border,
+    borderWidth: `1px 0`,
+    padding: `${theme.spacing(3)}px 0`,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  item: {
+    marginRight: theme.spacing(4),
     '&:last-child': {
       marginRight: 0
     }
   }
 }));
 
-const NavigationItem : React.FC<NavigationItemProps> = (props) => {
-
-  const history = useHistory();
-  const classes = useItemStyles();
-  const {path, title} = props;
-
+export const NavigationBar: React.FC<NavigationBarProps> = (props) => {
+  const {items} = props;
+  const classes = useStyles();
   return (
-    <span className={classes.root} onClick={() => history.push(path)}>{title}</span>
+    <nav className={classes.root}>
+      {items.map(item => <NavigationItem className={classes.item} key={item.path} path={item.path} title={item.title} />)}
+    </nav>
   );
 };
