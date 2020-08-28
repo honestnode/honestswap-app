@@ -108,8 +108,8 @@ export const Mint: React.FC = () => {
         <p><span className={classes.summaryLeading}>New balance</span><span className={classes.summaryAmount}>{Numbers.format(account.balance('hUSD') + totalAmount)}</span><span className={classes.summaryUnit}>hUSD</span></p>
       </div>
       <div className={classes.action}>
-        <p>Estimated Gas Fee: 0.01 ETH ($20 USD)</p>
         <p><Button label={'MINT hUSD'} onClick={onMint}/></p>
+        <p>Estimated Gas Fee: 0.01 ETH ($20 USD)</p>
       </div>
       <div className={classes.poolShare}>
         <PoolShare/>
