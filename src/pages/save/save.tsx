@@ -1,72 +1,55 @@
-import BigNumber from 'bignumber.js';
 import React from 'react';
-import {Button} from '../../components/button';
+import {createUseStyles} from 'react-jss';
+import {HonestTheme} from '../../common/theme';
 import {PoolShare} from '../../components/pool';
-import {TokenSend} from '../../components';
 import {Essential} from './essential';
+import {SaveForm} from './save-form';
+import {WithdrawForm} from './withdraw-form';
+
+const useStyles = createUseStyles<HonestTheme>(theme => ({
+  root: {},
+  essential: {
+
+  },
+  saveForm: {
+    maxWidth: '1024px',
+    borderTop: `1px solid ${theme.palette.border}`,
+    paddingTop: `${theme.spacing(2)}px`,
+    margin: `${theme.spacing(4)}px auto`
+  },
+  withdrawForm: {
+    maxWidth: '1024px',
+    borderTop: `1px solid ${theme.palette.border}`,
+    paddingTop: `${theme.spacing(2)}px`,
+    margin: `${theme.spacing(4)}px auto`
+  },
+  poolShare: {
+    maxWidth: '1024px',
+    borderTop: `1px solid ${theme.palette.border}`,
+    margin: `${theme.spacing(4)}px auto`,
+    paddingTop: `${theme.spacing(2)}px`,
+  }
+}));
 
 export const Save: React.FC = () => {
 
+  const classes = useStyles();
+
   return (
-    <div>
-      <div>
+    <div className={classes.root}>
+      <div className={classes.essential}>
         <Essential />
       </div>
-      <div>
+      <div className={classes.saveForm}>
         <SaveForm />
       </div>
-      <div>
+      <div className={classes.withdrawForm}>
         <WithdrawForm />
       </div>
-      <div>
+      <div className={classes.poolShare}>
         <PoolShare />
       </div>
     </div>
   );
 };
 
-const SaveForm: React.FC = () => {
-
-  const [balance, setBalance] = React.useState<BigNumber>(new BigNumber(20.02));
-
-  const onDeposit = () => {};
-
-  return (
-    <div>
-      <div>
-        <p>Save</p>
-        <p>Deposit your hUSD into the hUSD save contract and start earning interest.</p>
-      </div>
-      <div>
-        <TokenSend icon={''} name={'hUSD'} balance={balance} onValueChanged={(v) => setBalance(balance.minus(v))} />
-      </div>
-      <div>
-        <p>Estimated Gas Fee: 0.01 ETH ($20 USD)</p>
-        <p><Button label={'Deposit hUSD'} onClick={onDeposit} /></p>
-      </div>
-    </div>
-  );
-};
-
-const WithdrawForm: React.FC = () => {
-
-  const [balance, setBalance] = React.useState<BigNumber>(new BigNumber(20.02));
-
-  const onWithdraw = () => {};
-
-  return (
-    <div>
-      <div>
-        <p>Withdraw</p>
-        <p>Withdraw hUSD into your wallet.</p>
-      </div>
-      <div>
-        <TokenSend icon={''} name={'hUSD'} balance={balance} onValueChanged={(v) => setBalance(balance.minus(v))} />
-      </div>
-      <div>
-        <p>Estimated Gas Fee: 0.01 ETH ($20 USD)</p>
-        <p><Button label={'Withdraw hUSD'} onClick={onWithdraw} /></p>
-      </div>
-    </div>
-  );
-};

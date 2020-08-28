@@ -9,6 +9,7 @@ export interface HonestPalette {
   background: string;
   buttonPrimary: string;
   buttonPrimaryDarker: string;
+  buttonDisabled: string;
   text: string;
   textDarker: string;
   textLighter: string;
@@ -28,6 +29,7 @@ export const theme: HonestTheme = {
     background: '#f0f0f0',
     buttonPrimary: '#66cbff',
     buttonPrimaryDarker: '#0099ff',
+    buttonDisabled: '#eee',
     textDarker: '#404040',
     text: '#909090',
     textLighter: '#b0b0b0',

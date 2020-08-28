@@ -9,7 +9,8 @@ import {TokenProps} from './token-props';
 export interface TokenReceivedProps extends TokenProps, ComponentProps {
   amount?: BigNumber;
   maxAmount?: BigNumber;
-  readonly?: boolean;
+  baton?: boolean;
+  disabled?: boolean;
   onValueChanged?: (value: BigNumber) => void;
 }
 
@@ -51,28 +52,15 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
 }));
 
 export const TokenReceived: React.FC<TokenReceivedProps> = (props) => {
-  const {className, icon, name, amount = new BigNumber(0), maxAmount, readonly, onValueChanged} = props;
+  const {className, icon, name, value, maxAmount, disabled = false, onValueChanged} = props;
   const classes = useStyles();
-  const [value, setValue] = React.useState<BigNumber>(amount);
-
-  React.useEffect(() => {
-    if (readonly) {
-      setValue(amount);
-    }
-  }, [amount]);
-
-  React.useEffect(() => {
-    if (!readonly) {
-      setValue(new BigNumber(0));
-    }
-  }, [readonly]);
 
   const onInputChanged = (e: ChangeEvent<HTMLInputElement>): void => {
-    let input = new BigNumber(e.target.value) || new BigNumber(0);
+    let input = new BigNumber(e.target.value);
+    input = input.isNaN() ? new BigNumber(0) : input;
     if (maxAmount !== undefined && input > maxAmount) {
       input = maxAmount;
     }
-    setValue(input);
     onValueChanged && onValueChanged(input);
   };
 
@@ -81,7 +69,7 @@ export const TokenReceived: React.FC<TokenReceivedProps> = (props) => {
       <img className={classes.icon} src={icon} alt={'icon'}/>
       <span className={classes.name}>{name}</span>
       <span className={classes.label}>You will get</span>
-      <input className={classes.amount} disabled={readonly} type={'number'} onFocus={e => {e.target.select();}}
+      <input className={classes.amount} disabled={disabled} type={'number'} onFocus={e => {e.target.select();}}
              value={value.toString()} onChange={onInputChanged}/>
       <span className={classes.spacer}/>
     </div>

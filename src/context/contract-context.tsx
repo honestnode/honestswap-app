@@ -30,7 +30,7 @@ export const ContractContextProvider: React.FC = ({children}) => {
     ],
     hUSD: {
       name: 'hUSD', icon: '/assets/icon/husd.svg', address: 'hUSD', amount: new BigNumber(10000), share: new BigNumber(1)
-    }
+    },
   });
 
   return (

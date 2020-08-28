@@ -31,7 +31,7 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
     textAlign: 'center',
     '& img': {
       width: '32px',
-      height: '32px',
+      height: '32px'
     }
   },
   received: {
@@ -53,7 +53,7 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
     textAlign: 'center',
     marginTop: `${theme.spacing(4)}px`,
     '& p': {
-      marginBottom: `${theme.spacing()}px`,
+      marginBottom: `${theme.spacing(2)}px`,
       color: theme.palette.textLighter,
       fontSize: '14px',
       '&:last-child': {
@@ -74,27 +74,25 @@ export const Redeem: React.FC = () => {
   const classes = useStyles();
   const contract = useContract();
   const account = useAccount();
-  const balance = React.useMemo<BigNumber>(() => account.balance(contract.hUSD.address), [contract, account]);
 
+  const balance = account.balance(contract.hUSD.address);
+
+  const [amount, setAmount] = React.useState<BigNumber>(new BigNumber(0));
   const [tokenAmounts, setTokenAmounts] = React.useState<Record<string, BigNumber>>({});
   const [proportion, setProportion] = React.useState<boolean>(true);
 
-  const totalAmount = React.useMemo<BigNumber>(() => {
-    if (Object.keys(tokenAmounts).length === 0) {
-      return new BigNumber(0);
-    }
-    return Object.entries(tokenAmounts).map(([_, v]) => v).reduce((pv, cv) => pv.plus(cv));
-  }, [tokenAmounts]);
-
-  const onTotalAmountChanged = (amount: BigNumber): void => {
+  const onAmountChanged = (value: BigNumber): void => {
+    setAmount(value);
     setTokenAmounts(contract.tokens.reduce((pt, ct) => ({
       ...pt,
-      [ct.name]: amount.multipliedBy(ct.share)
+      [ct.name]: value.multipliedBy(ct.share)
     }), {}));
   };
 
   const onTokenAmountChanged = (name: string, value: BigNumber): void => {
-    setTokenAmounts({...tokenAmounts, [name]: value});
+    let amounts = {...tokenAmounts, [name]: value};
+    setTokenAmounts(amounts);
+    setAmount(Object.entries(amounts).map(([_, v]) => v).reduce((pv, cv) => pv.plus(cv)));
   };
 
   const getTokenMaxAmount = (name: string): BigNumber => {
@@ -105,9 +103,10 @@ export const Redeem: React.FC = () => {
     return balance.minus(remainTokenAmounts.map(([_, v]) => v).reduce((pv, cv) => pv.plus(cv)));
   };
 
-  const onProportionChanged = (value: boolean) => {
-    setTokenAmounts({});
+  const onProportionChanged = (value: boolean): void => {
     setProportion(value);
+    setTokenAmounts({});
+    setAmount(new BigNumber(0));
   };
 
   const onRedeem = () => {};
@@ -119,18 +118,19 @@ export const Redeem: React.FC = () => {
         <p className={classes.subTitle}>Withdraw stablecoins to your wallet.</p>
       </div>
       <div className={classes.inputForm}>
-        <TokenSend icon={contract.hUSD.icon} name={contract.hUSD.name} readonly={!proportion}
-                   amount={totalAmount} balance={balance} onValueChanged={onTotalAmountChanged}/>
+        <TokenSend icon={contract.hUSD.icon} name={contract.hUSD.name} disabled={!proportion}
+                   value={amount} balance={balance} onValueChanged={onAmountChanged}/>
         <p className={classes.proportion}>
           <Checkbox label={'Redeem with all assets proportionally'} initialValue={proportion}
                     onValueChanged={onProportionChanged}/>
         </p>
       </div>
-      <div className={classes.to}><img src={'/assets/icon/arrow-down.svg'} alt={'to'} /></div>
+      <div className={classes.to}><img src={'/assets/icon/arrow-down.svg'} alt={'to'}/></div>
       <div className={classes.received}>
         {contract.tokens.map(t => (
-          <TokenReceived key={t.name} className={classes.receivedItem} readonly={proportion} name={t.name} icon={t.icon}
-                         amount={tokenAmounts[t.name]} maxAmount={getTokenMaxAmount(t.name)}
+          <TokenReceived key={t.name} className={classes.receivedItem} disabled={proportion}
+                         name={t.name} icon={t.icon} value={tokenAmounts[t.name] || new BigNumber(0)}
+                         maxAmount={getTokenMaxAmount(t.name)}
                          onValueChanged={v => onTokenAmountChanged(t.name, v)}/>
         ))}
         {!proportion && <p className={classes.fee}>Redeem Fee: 0.1%</p>}

@@ -10,11 +10,11 @@ import {TokenProps} from './token-props';
 export interface TokenBalance extends TokenProps {
   amount?: BigNumber;
   balance: BigNumber;
-  readonly?: boolean;
 }
 
 export interface TokenSendProps extends TokenBalance, ComponentProps {
-  onValueChanged?: (value: BigNumber) => void;
+  baton?: boolean;
+  disabled?: boolean;
 }
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
@@ -60,42 +60,29 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
 
 export const TokenSend: React.FC<TokenSendProps> = (props) => {
 
-  const {className, icon, name, amount = new BigNumber(0), balance, readonly = false, onValueChanged} = props;
+  const {className, icon, name, value, balance, disabled = false, onValueChanged} = props;
   const classes = useStyles();
-  const [value, setValue] = React.useState<BigNumber>(amount);
 
-  React.useEffect(() => {
-    if (readonly) {
-      setValue(amount);
-    }
-  }, [amount]);
-
-  React.useEffect(() => {
-    if (!readonly) {
-      setValue(new BigNumber(0));
-    }
-  }, [readonly]);
 
   const onInputValueChanged = (input: BigNumber) => {
-    setValue(input);
     onValueChanged && onValueChanged(input);
   };
 
   const onInputChanged = (e: ChangeEvent<HTMLInputElement>): void => {
-    let input = new BigNumber(e.target.value) || new BigNumber(0);
-    input = input > balance ? balance : input;
+    let input = new BigNumber(e.target.value);
+    input = input.isNaN() ? new BigNumber(0) : (input.gt(balance) ? balance : input);
     onInputValueChanged(input);
   };
 
   const onMaxClicked = (): void => {
-    !readonly && onInputValueChanged(balance);
+    !disabled && onInputValueChanged(balance);
   };
 
   return (
     <div className={clsx(classes.root, className)}>
       <img className={classes.icon} src={icon} alt={'icon'}/>
       <span className={classes.name}>{name}</span>
-      <input className={classes.amount} type={'number'} disabled={readonly} onFocus={e => {e.target.select();}}
+      <input className={classes.amount} type={'number'} disabled={disabled} onFocus={e => {e.target.select();}}
              value={value.toString()} onChange={onInputChanged}/>
       <span className={classes.max} onClick={onMaxClicked}>Max</span>
       <span className={classes.balance}>{Numbers.format(balance)}</span>

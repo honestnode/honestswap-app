@@ -13,9 +13,13 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
     color: theme.palette.textWhite,
     border: `1px solid ${theme.palette.border}`,
     padding: `${theme.spacing(2)}px ${theme.spacing(3)}px`,
+    cursor: 'pointer',
     borderRadius: '8px',
     '&:hover': {
       background: theme.palette.buttonPrimaryDarker
+    },
+    '&:focus': {
+      outline: 0
     }
   }
 }));

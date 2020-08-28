@@ -68,7 +68,7 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
     textAlign: 'center',
     marginTop: `${theme.spacing(4)}px`,
     '& p': {
-      marginBottom: `${theme.spacing()}px`,
+      marginBottom: `${theme.spacing(2)}px`,
       color: theme.palette.textLighter,
       fontSize: '14px',
       '&:last-child': {
@@ -100,6 +100,7 @@ export const Mint: React.FC = () => {
 
   const onTokenInputChanged = (name: string, value: BigNumber) => {
     setAmount({...amount, [name]: value});
+    console.log(Object.entries(amount).map(([k,v]) => ({key: k, value: v.toFixed(2)})));
   };
 
   const onMint = () => {
@@ -113,11 +114,11 @@ export const Mint: React.FC = () => {
         <p className={classes.subTitle}>Deposit stablecoins, get hUSD at 1:1 ratio.</p>
       </div>
       <div className={classes.poolInput}>
-        <PoolInput onTokenInputChanged={onTokenInputChanged}/>
+        <PoolInput tokens={amount} onTokenChanged={onTokenInputChanged}/>
       </div>
       <div className={classes.to}><img src={'/assets/icon/arrow-down.svg'} alt={'to'} /></div>
       <div className={classes.received}>
-        <TokenReceived icon={contract.hUSD.icon} name={contract.hUSD.name} amount={totalAmount} readonly={true} />
+        <TokenReceived icon={contract.hUSD.icon} name={contract.hUSD.name} value={totalAmount} disabled />
       </div>
       <div className={classes.summary}>
         <p><span className={classes.summaryLeading}>Current balance</span><span className={classes.summaryAmount}>{Numbers.format(account.balance('hUSD'))}</span><span className={classes.summaryUnit}>hUSD</span></p>
