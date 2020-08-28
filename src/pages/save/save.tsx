@@ -1,7 +1,7 @@
 import React from 'react';
 import {Button} from '../../components/button';
 import {PoolShare} from '../../components/pool';
-import {TokenInput} from '../../components/token-input';
+import {TokenInput} from '../../components';
 import {Essential} from './essential';
 
 export const Save: React.FC = () => {

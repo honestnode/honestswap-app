@@ -3,6 +3,10 @@ import {createUseStyles} from 'react-jss';
 import {HonestTheme} from '../../common/theme';
 import {MetaMaskAccount} from './metamask-account';
 
+export interface AppBarProps {
+  account?: string;
+}
+
 const useStyles = createUseStyles<HonestTheme>(theme => ({
   root: {
     position: 'relative',
@@ -23,8 +27,9 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
   }
 }));
 
-export const AppBar : React.FC = () => {
+export const AppBar : React.FC<AppBarProps> = (props) => {
 
+  const {account} = props;
   const classes = useStyles();
 
   return (
@@ -33,9 +38,11 @@ export const AppBar : React.FC = () => {
         {/*<img src={''} alt={'logo'} />*/}
         <span>HonestSwap</span>
       </div>
-      <div className={classes.account}>
-        <MetaMaskAccount address={'0xa9167658C30598E70a4643909B86B7d0ad2E2d2A'} />
-      </div>
+      {account && (
+        <div className={classes.account}>
+          <MetaMaskAccount address={account} />
+        </div>
+      )}
     </header>
   );
 };

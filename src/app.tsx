@@ -1,9 +1,9 @@
 import React from 'react';
-import {createUseStyles} from 'react-jss';
+import {createUseStyles, ThemeProvider} from 'react-jss';
 import {BrowserRouter, Redirect, Route, Switch} from 'react-router-dom';
-import {HonestTheme} from './common/theme';
+import {HonestTheme, theme} from './common/theme';
 import {Frame} from './components/layout';
-import {ContractContextProvider} from './context/contract-context';
+import {AccountContextProvider, ContractContextProvider, useAccount} from './context';
 import {routes} from './routes';
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
@@ -23,19 +23,31 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
 
 export const App: React.FC = () => {
 
+  return (
+    <ThemeProvider theme={theme}>
+      <ContractContextProvider>
+        <AccountContextProvider>
+          <BrowserRouter>
+            <Main/>
+          </BrowserRouter>
+        </AccountContextProvider>
+      </ContractContextProvider>
+    </ThemeProvider>
+  );
+};
+
+export const Main: React.FC = () => {
+
   const navigations = routes.filter(r => r.navigator).map(r => ({path: r.path, title: r.title}));
   useStyles();
+  const account = useAccount();
 
   return (
-    <ContractContextProvider>
-      <BrowserRouter>
-        <Frame navigations={navigations}>
-          <Switch>
-            {routes.map(r => <Route key={r.path} path={r.path} exact={r.exact} component={r.component}/>)}
-            <Redirect to={'/error'}/>
-          </Switch>
-        </Frame>
-      </BrowserRouter>
-    </ContractContextProvider>
+    <Frame navigations={navigations} account={account.address}>
+      <Switch>
+        {routes.map(r => <Route key={r.path} path={r.path} exact={r.exact} component={r.component}/>)}
+        <Redirect to={'/error'}/>
+      </Switch>
+    </Frame>
   );
 };

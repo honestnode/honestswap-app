@@ -30,7 +30,7 @@ export const theme: HonestTheme = {
     buttonPrimaryDarker: '#0099ff',
     textDarker: '#404040',
     text: '#909090',
-    textLighter: '#a0a0a0',
+    textLighter: '#b0b0b0',
     textWhite: '#f0f0f0',
     token: name => {
       const themed: Record<string, string> = {
