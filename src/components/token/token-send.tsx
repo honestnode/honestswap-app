@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
 import React, {ChangeEvent} from 'react';
 import {createUseStyles} from 'react-jss';
@@ -7,11 +8,13 @@ import {ComponentProps} from '../component-props';
 import {TokenProps} from './token-props';
 
 export interface TokenBalance extends TokenProps {
-  balance: number;
+  amount?: BigNumber;
+  balance: BigNumber;
+  readonly?: boolean;
 }
 
-export interface TokenInputProps extends TokenBalance, ComponentProps {
-  onValueChanged: (value: number) => void;
+export interface TokenSendProps extends TokenBalance, ComponentProps {
+  onValueChanged?: (value: BigNumber) => void;
 }
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
@@ -55,29 +58,45 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
   }
 }));
 
-export const TokenInput: React.FC<TokenInputProps> = (props) => {
+export const TokenSend: React.FC<TokenSendProps> = (props) => {
 
-  const {className, icon, name, balance, onValueChanged} = props;
+  const {className, icon, name, amount = new BigNumber(0), balance, readonly = false, onValueChanged} = props;
   const classes = useStyles();
-  const [value, setValue] = React.useState<number>(0);
+  const [value, setValue] = React.useState<BigNumber>(amount);
+
+  React.useEffect(() => {
+    if (readonly) {
+      setValue(amount);
+    }
+  }, [amount]);
+
+  React.useEffect(() => {
+    if (!readonly) {
+      setValue(new BigNumber(0));
+    }
+  }, [readonly]);
+
+  const onInputValueChanged = (input: BigNumber) => {
+    setValue(input);
+    onValueChanged && onValueChanged(input);
+  };
 
   const onInputChanged = (e: ChangeEvent<HTMLInputElement>): void => {
-    let input = Number(e.target.value) || 0;
+    let input = new BigNumber(e.target.value) || new BigNumber(0);
     input = input > balance ? balance : input;
-    setValue(input);
-    onValueChanged(input);
+    onInputValueChanged(input);
   };
 
   const onMaxClicked = (): void => {
-    setValue(balance);
-    onValueChanged(balance);
-  }
+    !readonly && onInputValueChanged(balance);
+  };
 
   return (
     <div className={clsx(classes.root, className)}>
       <img className={classes.icon} src={icon} alt={'icon'}/>
       <span className={classes.name}>{name}</span>
-      <input className={classes.amount} type={'number'} value={value.toString()} onChange={onInputChanged}/>
+      <input className={classes.amount} type={'number'} disabled={readonly} onFocus={e => {e.target.select();}}
+             value={value.toString()} onChange={onInputChanged}/>
       <span className={classes.max} onClick={onMaxClicked}>Max</span>
       <span className={classes.balance}>{Numbers.format(balance)}</span>
     </div>

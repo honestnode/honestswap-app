@@ -1,11 +1,12 @@
+import BigNumber from 'bignumber.js';
 import React from 'react';
 import {createUseStyles} from 'react-jss';
 import {HonestTheme} from '../../common/theme';
 import {useAccount, useContract} from '../../context';
-import {TokenBalance, TokenInput} from '../token';
+import {TokenBalance, TokenSend} from '../token';
 
 export interface PoolInputProps {
-  onTokenInputChanged: (name: string, value: number) => void;
+  onTokenInputChanged: (name: string, value: BigNumber) => void;
 }
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
@@ -39,9 +40,9 @@ export const PoolInput: React.FC<PoolInputProps> = (props) => {
 
   return (
     <div className={classes.root}>
-      {accountBalances.map(t => <TokenInput key={t.name} className={classes.item}
-                                            icon={t.icon} name={t.name} balance={t.balance}
-                                            onValueChanged={value => onTokenInputChanged(t.name, value)}/>)}
+      {accountBalances.map(t => <TokenSend key={t.name} className={classes.item}
+                                           icon={t.icon} name={t.name} balance={t.balance}
+                                           onValueChanged={value => onTokenInputChanged(t.name, value)}/>)}
     </div>
   );
 };

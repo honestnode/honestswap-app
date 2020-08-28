@@ -1,9 +1,10 @@
+import BigNumber from 'bignumber.js';
 import React from 'react';
 import {createUseStyles} from 'react-jss';
 import {Numbers} from '../../common';
 import {HonestTheme} from '../../common/theme';
-import {Button, PoolInput, PoolShare} from '../../components';
-import {useAccount} from '../../context';
+import {Button, PoolInput, PoolShare, TokenReceived} from '../../components';
+import {useAccount, useContract} from '../../context';
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
   root: {
@@ -22,6 +23,17 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
   poolInput: {
     maxWidth: '1024px',
     margin: `${theme.spacing(4)}px auto`
+  },
+  to: {
+    textAlign: 'center',
+    '& img': {
+      width: '32px',
+      height: '32px',
+    }
+  },
+  received: {
+    maxWidth: '1024px',
+    margin: `${theme.spacing(4)}px auto ${theme.spacing(2)}px`
   },
   summary: {
     maxWidth: '1024px',
@@ -75,17 +87,18 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
 export const Mint: React.FC = () => {
 
   const classes = useStyles();
+  const contract = useContract();
   const account = useAccount();
 
-  const [amount, setAmount] = React.useState<Record<string, number>>({});
-  const totalAmount = React.useMemo(() => {
+  const [amount, setAmount] = React.useState<Record<string, BigNumber>>({});
+  const totalAmount = React.useMemo<BigNumber>(() => {
     if (Object.keys(amount).length === 0) {
-      return 0;
+      return new BigNumber(0);
     }
-    return Object.entries(amount).map(([_, v]) => v).reduce((pv, cv) => pv + cv);
+    return Object.entries(amount).map(([_, v]) => v).reduce((pv, cv) => pv.plus(cv));
   }, [amount]);
 
-  const onTokenInputChanged = (name: string, value: number) => {
+  const onTokenInputChanged = (name: string, value: BigNumber) => {
     setAmount({...amount, [name]: value});
   };
 
@@ -102,10 +115,13 @@ export const Mint: React.FC = () => {
       <div className={classes.poolInput}>
         <PoolInput onTokenInputChanged={onTokenInputChanged}/>
       </div>
+      <div className={classes.to}><img src={'/assets/icon/arrow-down.svg'} alt={'to'} /></div>
+      <div className={classes.received}>
+        <TokenReceived icon={contract.hUSD.icon} name={contract.hUSD.name} amount={totalAmount} readonly={true} />
+      </div>
       <div className={classes.summary}>
-        <p><span className={classes.summaryLeading}>You will get</span><span className={classes.summaryAmount}>{Numbers.format(totalAmount)}</span><span className={classes.summaryUnit}>hUSD</span></p>
         <p><span className={classes.summaryLeading}>Current balance</span><span className={classes.summaryAmount}>{Numbers.format(account.balance('hUSD'))}</span><span className={classes.summaryUnit}>hUSD</span></p>
-        <p><span className={classes.summaryLeading}>New balance</span><span className={classes.summaryAmount}>{Numbers.format(account.balance('hUSD') + totalAmount)}</span><span className={classes.summaryUnit}>hUSD</span></p>
+        <p><span className={classes.summaryLeading}>New balance</span><span className={classes.summaryAmount}>{Numbers.format(account.balance('hUSD').plus(totalAmount))}</span><span className={classes.summaryUnit}>hUSD</span></p>
       </div>
       <div className={classes.action}>
         <p><Button label={'MINT hUSD'} onClick={onMint}/></p>

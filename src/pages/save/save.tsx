@@ -1,7 +1,8 @@
+import BigNumber from 'bignumber.js';
 import React from 'react';
 import {Button} from '../../components/button';
 import {PoolShare} from '../../components/pool';
-import {TokenInput} from '../../components';
+import {TokenSend} from '../../components';
 import {Essential} from './essential';
 
 export const Save: React.FC = () => {
@@ -26,7 +27,7 @@ export const Save: React.FC = () => {
 
 const SaveForm: React.FC = () => {
 
-  const [balance, setBalance] = React.useState<number>(20.02);
+  const [balance, setBalance] = React.useState<BigNumber>(new BigNumber(20.02));
 
   const onDeposit = () => {};
 
@@ -37,7 +38,7 @@ const SaveForm: React.FC = () => {
         <p>Deposit your hUSD into the hUSD save contract and start earning interest.</p>
       </div>
       <div>
-        <TokenInput icon={''} name={'hUSD'} balance={balance} onValueChanged={(v) => setBalance(balance - v)} />
+        <TokenSend icon={''} name={'hUSD'} balance={balance} onValueChanged={(v) => setBalance(balance.minus(v))} />
       </div>
       <div>
         <p>Estimated Gas Fee: 0.01 ETH ($20 USD)</p>
@@ -49,7 +50,7 @@ const SaveForm: React.FC = () => {
 
 const WithdrawForm: React.FC = () => {
 
-  const [balance, setBalance] = React.useState<number>(20.02);
+  const [balance, setBalance] = React.useState<BigNumber>(new BigNumber(20.02));
 
   const onWithdraw = () => {};
 
@@ -60,7 +61,7 @@ const WithdrawForm: React.FC = () => {
         <p>Withdraw hUSD into your wallet.</p>
       </div>
       <div>
-        <TokenInput icon={''} name={'hUSD'} balance={balance} onValueChanged={(v) => setBalance(balance - v)} />
+        <TokenSend icon={''} name={'hUSD'} balance={balance} onValueChanged={(v) => setBalance(balance.minus(v))} />
       </div>
       <div>
         <p>Estimated Gas Fee: 0.01 ETH ($20 USD)</p>

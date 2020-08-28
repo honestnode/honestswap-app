@@ -2,7 +2,7 @@ import React from 'react';
 import {Numbers} from '../../common';
 import {Button} from '../../components/button';
 import {PoolShare} from '../../components/pool';
-import {TokenInput} from '../../components';
+import {TokenSend} from '../../components';
 
 interface Token {
   icon: string;
@@ -50,7 +50,7 @@ export const Swap: React.FC = () => {
         <select value={tokenFromName} onChange={e => setTokenFromName(e.target.value)}>
           {tokens.map(o => <option value={o.name}>{o.name}</option>)}
         </select>
-        <TokenInput icon={tokenFrom.icon} name={tokenFrom.name} balance={tokenFrom.balance} onValueChanged={v => {setAmount(v)}} />
+        <TokenSend icon={tokenFrom.icon} name={tokenFrom.name} balance={tokenFrom.balance} onValueChanged={v => {setAmount(v)}} />
       </div>
       <div>
         <select value={tokenToName} onChange={e => setTokenToName(e.target.value)}>

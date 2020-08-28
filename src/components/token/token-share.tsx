@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
 import React from 'react';
 import {createUseStyles} from 'react-jss';
@@ -8,8 +9,8 @@ import {TokenProps} from './token-props';
 
 export interface TokenShareProps extends TokenProps, ComponentProps {
   color: string;
-  amount: number;
-  share: number;
+  amount: BigNumber;
+  share: BigNumber;
 }
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
@@ -23,7 +24,7 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
     background: theme.palette.background,
     display: 'flex',
     alignItems: 'center',
-    padding: `${theme.spacing()}px`,
+    padding: `${theme.spacing()}px`
   },
   icon: {
     width: '32px',

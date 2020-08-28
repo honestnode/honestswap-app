@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import React from 'react';
 import {createUseStyles} from 'react-jss';
 import {Numbers} from '../../common';
@@ -25,7 +26,7 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
 }));
 
 export const Essential: React.FC = () => {
-  const {supply, apy} = {supply: 412343245.19123441, apy: 0.222322};
+  const {supply, apy} = {supply: new BigNumber(412343245.19123441), apy: new BigNumber(0.222322)};
   const classes = useStyles();
   return (
     <div className={classes.root}>
