@@ -75,11 +75,14 @@ export const Redeem: React.FC = () => {
   const contract = useContract();
   const account = useAccount();
 
-  const balance = account.balance(contract.hUSD.address);
-
+  const [balance, setBalance] = React.useState<BigNumber>(new BigNumber(0));
   const [amount, setAmount] = React.useState<BigNumber>(new BigNumber(0));
   const [tokenAmounts, setTokenAmounts] = React.useState<Record<string, BigNumber>>({});
   const [proportion, setProportion] = React.useState<boolean>(true);
+
+  React.useEffect(() => {
+    account.balance(contract.hUSD.address).then(balance => setBalance(balance));
+  }, []);
 
   const onAmountChanged = (value: BigNumber): void => {
     setAmount(value);
@@ -119,7 +122,7 @@ export const Redeem: React.FC = () => {
       </div>
       <div className={classes.inputForm}>
         <TokenSend icon={contract.hUSD.icon} name={contract.hUSD.name} disabled={!proportion}
-                   value={amount} balance={balance} onValueChanged={onAmountChanged}/>
+                   value={amount} address={contract.hUSD.address} onValueChanged={onAmountChanged}/>
         <p className={classes.proportion}>
           <Checkbox label={'Redeem with all assets proportionally'} initialValue={proportion}
                     onValueChanged={onProportionChanged}/>
@@ -129,7 +132,7 @@ export const Redeem: React.FC = () => {
       <div className={classes.received}>
         {contract.tokens.map(t => (
           <TokenReceived key={t.name} className={classes.receivedItem} disabled={proportion}
-                         name={t.name} icon={t.icon} value={tokenAmounts[t.name] || new BigNumber(0)}
+                         name={t.name} icon={t.icon} address={t.address} value={tokenAmounts[t.name] || new BigNumber(0)}
                          maxAmount={getTokenMaxAmount(t.name)}
                          onValueChanged={v => onTokenAmountChanged(t.name, v)}/>
         ))}

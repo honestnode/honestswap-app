@@ -1,10 +1,11 @@
+import clsx from 'clsx';
 import React from 'react';
 import {createUseStyles} from 'react-jss';
 import {HonestTheme} from '../../common/theme';
+import {useAccount} from '../../context';
+import {ComponentProps} from '../component-props';
 
-export interface MetaMaskAccountProps {
-  address: string;
-}
+export interface MetaMaskAccountProps extends ComponentProps {}
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
   root: {
@@ -12,28 +13,36 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
     alignItems: 'center',
   },
   icon: {
-    marginRight: theme.spacing(2),
+    marginRight: `${theme.spacing(2)}px`,
     width: '24px',
     height: '24px'
   },
   address: {
     textDecoration: 'underline'
+  },
+  logout: {
+    marginLeft: `${theme.spacing(2)}px`,
+    width: '16px',
+    height: '16px',
+    cursor: 'pointer'
   }
 }));
 
 export const MetaMaskAccount: React.FC<MetaMaskAccountProps> = (props) => {
 
-  const {address} = props;
+  const {className} = props;
   const classes = useStyles();
+  const account = useAccount();
 
   const maskAddress = (address: string): string => {
     return address.replace(/^(.{6}).+(.{4})$/g, '$1....$2');
   }
 
-  return (
-    <span className={classes.root}>
+  return account.address ? (
+    <span className={clsx(classes.root, className)}>
       <img className={classes.icon} src={'/assets/icon/metamask-fox.svg'} alt={'MetaMask'} />
-      <span className={classes.address}>{maskAddress(address)}</span>
+      <span className={classes.address}>{maskAddress(account.address)}</span>
+      {/*<img className={classes.logout} src={'/assets/icon/logout.svg'} alt={'Log Out'} onClick={account.logout} />*/}
     </span>
-  );
+  ) : null;
 };

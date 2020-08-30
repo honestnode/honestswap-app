@@ -5,7 +5,7 @@ import {HonestTheme} from '../../common/theme';
 import {TokenReceived, TokenSend} from '../../components';
 import {Button} from '../../components/button';
 import {PoolShare} from '../../components/pool';
-import {ContractToken, useAccount, useContract} from '../../context';
+import {ContractToken, useContract} from '../../context';
 import {TokenSelect} from './token-select';
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
@@ -82,7 +82,6 @@ export const Swap: React.FC = () => {
 
   const classes = useStyles();
   const contract = useContract();
-  const account = useAccount();
 
   const tokenOptions = contract.tokens.map(t => t.name);
 
@@ -121,14 +120,14 @@ export const Swap: React.FC = () => {
         <TokenSelect className={classes.fromSelect} options={tokenOptions} value={tokenFromName} disabled={[tokenToName]}
                      onSelectionChanged={t => setTokenFromName(t)}/>
         <TokenSend className={classes.fromForm} icon={tokenFrom.icon} name={tokenFrom.name} value={amount}
-                   balance={account.balance(tokenFrom.address)} onValueChanged={v => setAmount(v)}/>
+                   address={tokenFrom.address} onValueChanged={v => setAmount(v)}/>
       </div>
       <div className={classes.arrow}><img src={'/assets/icon/arrow-down.svg'} alt={'to'}/></div>
       <div className={classes.to}>
         <TokenSelect className={classes.toSelect} options={tokenOptions} value={tokenToName} disabled={[tokenFromName]}
                      onSelectionChanged={t => setTokenToName(t)}/>
-        <TokenReceived className={classes.toForm} icon={tokenTo.icon} name={tokenTo.name} disabled={true}
-                       value={amount}/>
+        <TokenReceived className={classes.toForm} icon={tokenTo.icon} name={tokenTo.name} address={tokenTo.address}
+                       disabled={true} value={amount}/>
       </div>
       <div className={classes.fee}>Swap Fee: 0.1%</div>
       <div className={classes.action}>

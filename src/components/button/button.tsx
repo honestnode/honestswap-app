@@ -4,6 +4,7 @@ import {HonestTheme} from '../../common/theme';
 
 export interface ButtonProps {
   label: string;
+  disabled?: boolean;
   onClick: () => void;
 }
 
@@ -26,10 +27,10 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
 
 export const Button: React.FC<ButtonProps> = (props) => {
 
-  const {label, onClick} = props;
+  const {label, disabled, onClick} = props;
   const classes = useStyles();
 
   return (
-    <button className={classes.root} onClick={onClick}>{label}</button>
+    <button className={classes.root} disabled={disabled} onClick={onClick}>{label}</button>
   );
 };

@@ -27,7 +27,7 @@ export const theme: HonestTheme = {
   palette: {
     border: '#d0d0d0',
     background: '#f0f0f0',
-    buttonPrimary: '#66cbff',
+    buttonPrimary: '#0099ff',
     buttonPrimaryDarker: '#0099ff',
     buttonDisabled: '#eee',
     textDarker: '#404040',

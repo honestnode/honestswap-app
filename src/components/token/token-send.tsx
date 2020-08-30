@@ -4,12 +4,12 @@ import React, {ChangeEvent} from 'react';
 import {createUseStyles} from 'react-jss';
 import {Numbers} from '../../common';
 import {HonestTheme} from '../../common/theme';
+import {useAccount} from '../../context';
 import {ComponentProps} from '../component-props';
 import {TokenProps} from './token-props';
 
 export interface TokenBalance extends TokenProps {
   amount?: BigNumber;
-  balance: BigNumber;
 }
 
 export interface TokenSendProps extends TokenBalance, ComponentProps {
@@ -60,9 +60,15 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
 
 export const TokenSend: React.FC<TokenSendProps> = (props) => {
 
-  const {className, icon, name, value, balance, disabled = false, onValueChanged} = props;
+  const {className, icon, name, address, value, disabled = false, onValueChanged} = props;
   const classes = useStyles();
+  const account = useAccount();
 
+  const [balance, setBalance] = React.useState<BigNumber>(new BigNumber(0));
+
+  React.useEffect(() => {
+    account.balance(address).then(balance => setBalance(balance));
+  }, []);
 
   const onInputValueChanged = (input: BigNumber) => {
     onValueChanged && onValueChanged(input);

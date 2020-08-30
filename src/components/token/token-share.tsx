@@ -9,7 +9,6 @@ import {TokenProps} from './token-props';
 
 export interface TokenShareProps extends TokenProps, ComponentProps {
   color: string;
-  amount: BigNumber;
   share: BigNumber;
 }
 
@@ -55,7 +54,7 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
 }));
 
 export const TokenShare: React.FC<TokenShareProps> = (props) => {
-  const {className, icon, color, name, amount, share} = props;
+  const {className, icon, color, name, value, share} = props;
   const sharePercent = React.useMemo(() => Numbers.format(share, {percentage: true}), [share]);
   const classes = useStyles();
 
@@ -67,7 +66,7 @@ export const TokenShare: React.FC<TokenShareProps> = (props) => {
         <span className={classes.spacer}>
         <span className={classes.amount}
               style={{width: sharePercent, background: color}}>
-          <span>{Numbers.format(amount)}</span>
+          <span>{Numbers.format(value)}</span>
         </span>
       </span>
       </div>

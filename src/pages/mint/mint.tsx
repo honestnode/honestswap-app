@@ -91,6 +91,8 @@ export const Mint: React.FC = () => {
   const account = useAccount();
 
   const [amount, setAmount] = React.useState<Record<string, BigNumber>>({});
+  const [balance, setBalance] = React.useState<BigNumber>(new BigNumber(0));
+
   const totalAmount = React.useMemo<BigNumber>(() => {
     if (Object.keys(amount).length === 0) {
       return new BigNumber(0);
@@ -98,9 +100,12 @@ export const Mint: React.FC = () => {
     return Object.entries(amount).map(([_, v]) => v).reduce((pv, cv) => pv.plus(cv));
   }, [amount]);
 
+  React.useEffect(() => {
+    account.balance(contract.hUSD.address).then(balance => setBalance(balance));
+  }, []);
+
   const onTokenInputChanged = (name: string, value: BigNumber) => {
     setAmount({...amount, [name]: value});
-    console.log(Object.entries(amount).map(([k,v]) => ({key: k, value: v.toFixed(2)})));
   };
 
   const onMint = () => {
@@ -118,11 +123,11 @@ export const Mint: React.FC = () => {
       </div>
       <div className={classes.to}><img src={'/assets/icon/arrow-down.svg'} alt={'to'} /></div>
       <div className={classes.received}>
-        <TokenReceived icon={contract.hUSD.icon} name={contract.hUSD.name} value={totalAmount} disabled />
+        <TokenReceived icon={contract.hUSD.icon} name={contract.hUSD.name} value={totalAmount} address={contract.hUSD.address} disabled />
       </div>
       <div className={classes.summary}>
-        <p><span className={classes.summaryLeading}>Current balance</span><span className={classes.summaryAmount}>{Numbers.format(account.balance('hUSD'))}</span><span className={classes.summaryUnit}>hUSD</span></p>
-        <p><span className={classes.summaryLeading}>New balance</span><span className={classes.summaryAmount}>{Numbers.format(account.balance('hUSD').plus(totalAmount))}</span><span className={classes.summaryUnit}>hUSD</span></p>
+        <p><span className={classes.summaryLeading}>Current balance</span><span className={classes.summaryAmount}>{Numbers.format(balance)}</span><span className={classes.summaryUnit}>hUSD</span></p>
+        <p><span className={classes.summaryLeading}>New balance</span><span className={classes.summaryAmount}>{Numbers.format(balance.plus(totalAmount))}</span><span className={classes.summaryUnit}>hUSD</span></p>
       </div>
       <div className={classes.action}>
         <p><Button label={'MINT hUSD'} onClick={onMint}/></p>

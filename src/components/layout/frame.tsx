@@ -5,14 +5,13 @@ import {NavigationItemProps} from './navigation-item';
 
 export interface FrameProps {
   navigations: NavigationItemProps[];
-  account?: string;
 }
 
 export const Frame: React.FC<FrameProps> = (props) => {
-  const {navigations, account, children} = props;
+  const {navigations, children} = props;
   return (
     <>
-      <AppBar account={account}/>
+      <AppBar/>
       <NavigationBar items={navigations}/>
       <main>{children}</main>
     </>

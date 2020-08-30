@@ -3,7 +3,7 @@ import React from 'react';
 import {createUseStyles} from 'react-jss';
 import {HonestTheme} from '../../common/theme';
 import {Button, TokenSend} from '../../components';
-import {useAccount, useContract} from '../../context';
+import {useContract} from '../../context';
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
   root: {},
@@ -38,8 +38,9 @@ export const WithdrawForm: React.FC = () => {
 
   const classes = useStyles();
   const contract = useContract();
-  const account = useAccount();
-  const [balance, setBalance] = React.useState<BigNumber>(new BigNumber(0));
+
+  const [amount, setAmount] = React.useState<BigNumber>(new BigNumber(0));
+
 
   const onWithdraw = () => {};
 
@@ -50,8 +51,8 @@ export const WithdrawForm: React.FC = () => {
         <p className={classes.subTitle}>Withdraw hUSD into your wallet.</p>
       </div>
       <div className={classes.form}>
-        <TokenSend icon={contract.hUSD.icon} name={contract.hUSD.name} balance={account.balance(contract.hUSD.address)}
-                   value={balance} onValueChanged={(v) => setBalance(v)}/>
+        <TokenSend icon={contract.hUSD.icon} name={contract.hUSD.name} address={contract.hUSD.address}
+                   value={amount} onValueChanged={(v) => setAmount(v)}/>
       </div>
       <div className={classes.action}>
         <p><Button label={'Withdraw hUSD'} onClick={onWithdraw}/></p>
