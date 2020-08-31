@@ -15,7 +15,7 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
     maxWidth: '1024px',
     borderTop: `1px solid ${theme.palette.border}`,
     paddingTop: `${theme.spacing(2)}px`,
-    margin: `${theme.spacing(4)}px auto`
+    margin: `0 auto ${theme.spacing(4)}px auto`
   },
   withdrawForm: {
     maxWidth: '1024px',

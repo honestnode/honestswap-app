@@ -32,7 +32,7 @@ export const Essential: React.FC = () => {
     <div className={classes.root}>
       <div className={classes.section}>
         <span className={classes.leading}>Total hUSD supply</span>
-        <span className={classes.value}>{Numbers.format(supply, {thousandsSeparate: true, decimals: 8})}</span>
+        <span className={classes.value}>{Numbers.format(supply)}</span>
       </div>
       <div className={classes.section}>
         <span className={classes.leading}>APY</span>

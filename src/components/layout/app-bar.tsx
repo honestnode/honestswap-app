@@ -20,9 +20,7 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
     textTransform: 'uppercase',
     color: theme.palette.textDarker,
     '& img': {
-      width: '48px',
-      height: '48px',
-      marginRight: `${theme.spacing(2)}px`
+      height: '48px'
     }
   },
   account: {
@@ -40,8 +38,8 @@ export const AppBar: React.FC<AppBarProps> = (props) => {
   return (
     <header className={clsx(classes.root, className)}>
       <div className={classes.title}>
-        <img src={'/assets/icon/honestswap-logo.svg'} alt={'logo'}/>
-        <span>HonestSwap</span>
+        <img src={'/assets/icon/honestswap.svg'} alt={'logo'}/>
+        {/*<span>HonestSwap</span>*/}
       </div>
       <MetaMaskAccount className={classes.account}/>
     </header>
