@@ -4,7 +4,7 @@ import {createUseStyles} from 'react-jss';
 import {Numbers} from '../../common';
 import {HonestTheme} from '../../common/theme';
 import {Button, PoolInput, PoolShare, TokenReceived} from '../../components';
-import {useAccount, useContract} from '../../context';
+import {useContract, useWallet} from '../../context';
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
   root: {
@@ -88,7 +88,7 @@ export const Mint: React.FC = () => {
 
   const classes = useStyles();
   const contract = useContract();
-  const account = useAccount();
+  const wallet = useWallet();
 
   const [amount, setAmount] = React.useState<Record<string, BigNumber>>({});
   const [balance, setBalance] = React.useState<BigNumber>(new BigNumber(0));
@@ -101,7 +101,7 @@ export const Mint: React.FC = () => {
   }, [amount]);
 
   React.useEffect(() => {
-    account.balance(contract.hUSD.address).then(balance => setBalance(balance));
+    wallet.getBalance(contract.hUSD.address).then(balance => setBalance(balance));
   }, []);
 
   const onTokenInputChanged = (name: string, value: BigNumber) => {

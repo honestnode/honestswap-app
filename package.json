@@ -7,7 +7,8 @@
   "author": "HonestNode",
   "license": "LGPL-3.0-or-later",
   "bin": {
-    "webpack": ".bin/webpack-cli"
+    "webpack": ".bin/webpack-cli",
+    "typechain": ".bin/typechain"
   },
   "scripts": {
     "start": "webpack-dev-server --open --config ./webpack/webpack.dev.js",
@@ -24,6 +25,7 @@
     "@babel/preset-env": "7.11.0",
     "@babel/preset-react": "7.10.4",
     "@babel/preset-typescript": "7.10.4",
+    "@typechain/web3-v1": "1.0.0",
     "@types/react": "16.9.47",
     "@types/react-dom": "16.9.8",
     "@types/react-router-dom": "5.1.5",
@@ -33,6 +35,7 @@
     "copy-webpack-plugin": "6.0.3",
     "html-webpack-plugin": "4.3.0",
     "terser-webpack-plugin": "4.1.0",
+    "typechain": "2.0.0",
     "typescript": "4.0.2",
     "webpack": "4.44.1",
     "webpack-cli": "3.3.12",
@@ -42,6 +45,7 @@
     "@babel/runtime-corejs3": "7.11.2",
     "bignumber.js": "9.0.0",
     "clsx": "1.1.1",
+    "ethers": "5.0.9",
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-jss": "10.4.0",

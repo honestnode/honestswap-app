@@ -10,9 +10,7 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
   root: {
     padding: `${theme.spacing(4)}px ${theme.spacing(2)}px ${theme.spacing(2)}px`
   },
-  essential: {
-
-  },
+  essential: {},
   poolShare: {
     maxWidth: '1024px',
     margin: `${theme.spacing(4)}px auto`
@@ -37,7 +35,7 @@ export const Overview: React.FC = () => {
         <PoolShare/>
       </div>
       <div className={classes.action}>
-        <Button label={'MINT hUSD'} onClick={() => history.push('mint')} />
+        <Button label={'MINT hUSD'} onClick={() => history.push('mint')}/>
       </div>
     </div>
   );

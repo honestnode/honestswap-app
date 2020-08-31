@@ -3,7 +3,7 @@ import React from 'react';
 import {createUseStyles} from 'react-jss';
 import {HonestTheme} from '../../common/theme';
 import {Button, Checkbox, PoolShare, TokenReceived, TokenSend} from '../../components';
-import {useAccount, useContract} from '../../context';
+import {useWallet, useContract} from '../../context';
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
   root: {
@@ -73,7 +73,7 @@ export const Redeem: React.FC = () => {
 
   const classes = useStyles();
   const contract = useContract();
-  const account = useAccount();
+  const wallet = useWallet();
 
   const [balance, setBalance] = React.useState<BigNumber>(new BigNumber(0));
   const [amount, setAmount] = React.useState<BigNumber>(new BigNumber(0));
@@ -81,7 +81,7 @@ export const Redeem: React.FC = () => {
   const [proportion, setProportion] = React.useState<boolean>(true);
 
   React.useEffect(() => {
-    account.balance(contract.hUSD.address).then(balance => setBalance(balance));
+    wallet.getBalance(contract.hUSD.address).then(balance => setBalance(balance));
   }, []);
 
   const onAmountChanged = (value: BigNumber): void => {

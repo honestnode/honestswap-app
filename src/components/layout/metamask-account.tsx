@@ -2,7 +2,7 @@ import clsx from 'clsx';
 import React from 'react';
 import {createUseStyles} from 'react-jss';
 import {HonestTheme} from '../../common/theme';
-import {useAccount} from '../../context';
+import {useWallet} from '../../context';
 import {ComponentProps} from '../component-props';
 
 export interface MetaMaskAccountProps extends ComponentProps {}
@@ -32,17 +32,17 @@ export const MetaMaskAccount: React.FC<MetaMaskAccountProps> = (props) => {
 
   const {className} = props;
   const classes = useStyles();
-  const account = useAccount();
+  const wallet = useWallet();
 
   const maskAddress = (address: string): string => {
     return address.replace(/^(.{6}).+(.{4})$/g, '$1....$2');
   }
 
-  return account.address ? (
+  return wallet.ready ? (
     <span className={clsx(classes.root, className)}>
       <img className={classes.icon} src={'/assets/icon/metamask-fox.svg'} alt={'MetaMask'} />
-      <span className={classes.address}>{maskAddress(account.address)}</span>
+      <span className={classes.address}>{maskAddress(wallet.account)}</span>
       {/*<img className={classes.logout} src={'/assets/icon/logout.svg'} alt={'Log Out'} onClick={account.logout} />*/}
     </span>
-  ) : null;
+  ): null;
 };
