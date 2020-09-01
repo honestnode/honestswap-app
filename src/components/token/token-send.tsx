@@ -68,7 +68,7 @@ export const TokenSend: React.FC<TokenSendProps> = (props) => {
 
   React.useEffect(() => {
     wallet.getBalance(address).then(balance => setBalance(balance));
-  }, []);
+  }, [address]);
 
   const onInputValueChanged = (input: BigNumber) => {
     onValueChanged && onValueChanged(input);
