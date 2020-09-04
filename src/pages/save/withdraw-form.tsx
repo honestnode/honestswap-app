@@ -3,7 +3,7 @@ import React from 'react';
 import {createUseStyles} from 'react-jss';
 import {HonestTheme} from '../../common/theme';
 import {Button, ERC20TokenInput} from '../../components';
-import {useContract} from '../../context';
+import {useContract, useSaving} from '../../context';
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
   root: {},
@@ -38,6 +38,7 @@ export const WithdrawForm: React.FC = () => {
 
   const classes = useStyles();
   const contract = useContract();
+  const saving = useSaving();
 
   const [amount, setAmount] = React.useState<BigNumber>(new BigNumber(0));
 
@@ -51,7 +52,7 @@ export const WithdrawForm: React.FC = () => {
         <p className={classes.subTitle}>Withdraw hUSD into your wallet.</p>
       </div>
       <div className={classes.form}>
-        <ERC20TokenInput contract={contract.hToken} value={amount} onValueChanged={(v) => setAmount(v)}/>
+        <ERC20TokenInput contract={contract.hToken} value={amount} balance={saving.balance} onValueChanged={(v) => setAmount(v)}/>
       </div>
       <div className={classes.action}>
         <p><Button label={'Withdraw hUSD'} onClick={onWithdraw}/></p>

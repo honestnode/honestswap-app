@@ -2,6 +2,7 @@ import React from 'react';
 import {createUseStyles} from 'react-jss';
 import {HonestTheme} from '../../common/theme';
 import {BasketShares} from '../../components/basket';
+import {SavingProvider} from '../../context';
 import {Essential} from './essential';
 import {SaveForm} from './save-form';
 import {WithdrawForm} from './withdraw-form';
@@ -34,20 +35,22 @@ export const Save: React.FC = () => {
   const classes = useStyles();
 
   return (
-    <div className={classes.root}>
-      <div className={classes.essential}>
-        <Essential/>
+    <SavingProvider>
+      <div className={classes.root}>
+        <div className={classes.essential}>
+          <Essential/>
+        </div>
+        <div className={classes.saveForm}>
+          <SaveForm/>
+        </div>
+        <div className={classes.withdrawForm}>
+          <WithdrawForm/>
+        </div>
+        <div className={classes.poolShare}>
+          <BasketShares/>
+        </div>
       </div>
-      <div className={classes.saveForm}>
-        <SaveForm/>
-      </div>
-      <div className={classes.withdrawForm}>
-        <WithdrawForm/>
-      </div>
-      <div className={classes.poolShare}>
-        <BasketShares/>
-      </div>
-    </div>
+    </SavingProvider>
   );
 };
 

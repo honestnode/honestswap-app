@@ -12,6 +12,7 @@ import {TokenHeader} from './token-header';
 export interface ERC20TokenInputProps extends ERC20TokenComponentProps {
   value: BigNumber;
   onValueChanged: (value: BigNumber) => void;
+  balance?: BigNumber;
 }
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
@@ -52,7 +53,7 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
 
 export const ERC20TokenInput: FC<ERC20TokenInputProps> = props => {
 
-  const {className, contract, disabled, value, onValueChanged} = props;
+  const {className, contract, disabled, value, onValueChanged, balance} = props;
   const classes = useStyles();
   const wallet = useWallet();
 
@@ -64,13 +65,13 @@ export const ERC20TokenInput: FC<ERC20TokenInputProps> = props => {
       contract.getName().then(name => r.name = name),
       contract.getSymbol().then(symbol => r.symbol = symbol),
       contract.getIcon().then(icon => r.icon = icon),
-      contract.getBalance(wallet.account).then(balance => r.balance = balance),
+      balance ? Promise.resolve(undefined) : contract.getBalance(wallet.account).then(balance => r.balance = balance)
     ]).then(() => {
       setToken({
         icon: r.icon,
         name: r.name,
         symbol: r.symbol,
-        balance: r.balance
+        balance: balance || r.balance
       });
     });
   }, [contract]);

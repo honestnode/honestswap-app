@@ -3,6 +3,7 @@ import React from 'react';
 import {createUseStyles} from 'react-jss';
 import {Numbers} from '../../common';
 import {HonestTheme} from '../../common/theme';
+import {useSaving} from '../../context';
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
   root: {
@@ -23,6 +24,7 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
     }
   },
   unit: {
+    fontSize: '14px',
     marginLeft: `${theme.spacing()}px`,
     color: theme.palette.textLighter
   },
@@ -52,20 +54,22 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
 }));
 
 export const Essential: React.FC = () => {
-  const {balance, weight, apy, share} = {
-    balance: new BigNumber(1233.8892323),
+  const {weight, apy, share} = {
     weight: new BigNumber(1400),
     apy: new BigNumber(0.222322),
     share: new BigNumber(0.0012)
   };
   const classes = useStyles();
+  const saving = useSaving();
 
   return (
     <div className={classes.root}>
       <div className={classes.summary}>
         <div className={classes.column}>
           <p className={classes.leading}>Your hUSD Saving Balance</p>
-          <p><span className={classes.number}>{Numbers.format(balance, {thousandsSeparate: true})}<span className={classes.unit}>hUSD</span></span></p>
+          <p><span className={classes.number}>
+              {Numbers.format(saving.balance, {thousandsSeparate: true})}
+            <span className={classes.unit}>hUSD</span></span></p>
         </div>
         <div className={classes.column}>
           <p className={classes.leading}>APY</p>
