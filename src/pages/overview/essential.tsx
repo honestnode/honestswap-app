@@ -1,8 +1,9 @@
 import BigNumber from 'bignumber.js';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {createUseStyles} from 'react-jss';
 import {Numbers} from '../../common';
 import {HonestTheme} from '../../common/theme';
+import {useContract} from '../../context';
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
   root: {
@@ -26,8 +27,19 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
 }));
 
 export const Essential: React.FC = () => {
-  const {supply, apy} = {supply: new BigNumber(412343245.19123441), apy: new BigNumber(0.222322)};
+
+
+  const {apy} = {apy: new BigNumber(0.222322)};
   const classes = useStyles();
+  const [supply, setSupply] = useState<BigNumber>(new BigNumber(0));
+
+  const contract = useContract();
+
+  useEffect(() => {
+    contract.hToken.getTotalSupply().then(setSupply);
+    // contract.hToken.collectInterest();
+  }, [contract]);
+
   return (
     <div className={classes.root}>
       <div className={classes.section}>

@@ -2,7 +2,7 @@ import React from 'react';
 import {createUseStyles} from 'react-jss';
 import {useHistory} from 'react-router-dom';
 import {HonestTheme} from '../../common/theme';
-import {PoolShare} from '../../components';
+import {BasketShares} from '../../components/basket/basket-shares';
 import {Button} from '../../components/button';
 import {Essential} from './essential';
 
@@ -32,7 +32,7 @@ export const Overview: React.FC = () => {
         <Essential/>
       </div>
       <div className={classes.poolShare}>
-        <PoolShare/>
+        <BasketShares/>
       </div>
       <div className={classes.action}>
         <Button label={'MINT hUSD'} onClick={() => history.push('mint')}/>

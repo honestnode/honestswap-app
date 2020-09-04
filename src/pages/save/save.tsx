@@ -1,16 +1,14 @@
 import React from 'react';
 import {createUseStyles} from 'react-jss';
 import {HonestTheme} from '../../common/theme';
-import {PoolShare} from '../../components/pool';
+import {BasketShares} from '../../components/basket';
 import {Essential} from './essential';
 import {SaveForm} from './save-form';
 import {WithdrawForm} from './withdraw-form';
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
   root: {},
-  essential: {
-
-  },
+  essential: {},
   saveForm: {
     maxWidth: '1024px',
     borderTop: `1px solid ${theme.palette.border}`,
@@ -27,7 +25,7 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
     maxWidth: '1024px',
     borderTop: `1px solid ${theme.palette.border}`,
     margin: `${theme.spacing(4)}px auto`,
-    paddingTop: `${theme.spacing(2)}px`,
+    paddingTop: `${theme.spacing(2)}px`
   }
 }));
 
@@ -38,16 +36,16 @@ export const Save: React.FC = () => {
   return (
     <div className={classes.root}>
       <div className={classes.essential}>
-        <Essential />
+        <Essential/>
       </div>
       <div className={classes.saveForm}>
-        <SaveForm />
+        <SaveForm/>
       </div>
       <div className={classes.withdrawForm}>
-        <WithdrawForm />
+        <WithdrawForm/>
       </div>
       <div className={classes.poolShare}>
-        <PoolShare />
+        <BasketShares/>
       </div>
     </div>
   );

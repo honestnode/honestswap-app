@@ -1,12 +1,10 @@
 import BigNumber from 'bignumber.js';
-import React from 'react';
+import React, {useState} from 'react';
 import {createUseStyles} from 'react-jss';
 import {HonestTheme} from '../../common/theme';
-import {TokenReceived, TokenSend} from '../../components';
+import {BasketShares, BasketTokenSelect, ERC20TokenInput, ERC20TokenReceived} from '../../components';
 import {Button} from '../../components/button';
-import {PoolShare} from '../../components/pool';
-import {ContractToken, useContract} from '../../context';
-import {TokenSelect} from './token-select';
+import {BasketToken} from '../../contract';
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
   root: {
@@ -81,34 +79,14 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
 export const Swap: React.FC = () => {
 
   const classes = useStyles();
-  const contract = useContract();
 
-  const tokenOptions = contract.tokens.map(t => t.name);
-
-  const [tokenFromName, setTokenFromName] = React.useState<string>(tokenOptions[0]);
-  const [tokenToName, setTokenToName] = React.useState<string>(tokenOptions[tokenOptions.length - 1]);
+  const [tokenFrom, setTokenFrom] = useState<BasketToken>();
+  const [tokenTo, setTokenTo] = useState<BasketToken>();
   const [amount, setAmount] = React.useState<BigNumber>(new BigNumber(0));
-
-  const findToken = (name: string): ContractToken => {
-    let token = contract.tokens.filter(t => t.name === name).pop();
-    if (token === undefined) {
-      throw new Error('Token not found');
-    }
-    return token;
-  };
-
-  const tokenFrom = React.useMemo<ContractToken>(() => {
-    return findToken(tokenFromName);
-  }, [tokenFromName]);
-
-
-  const tokenTo = React.useMemo<ContractToken>(() => {
-    return findToken(tokenToName);
-  }, [tokenToName]);
 
   React.useEffect(() => {
     setAmount(new BigNumber(0));
-  }, [tokenFromName, tokenToName])
+  }, [tokenFrom, tokenTo]);
 
   return (
     <div className={classes.root}>
@@ -117,17 +95,15 @@ export const Swap: React.FC = () => {
         <p className={classes.subTitle}>Swap stablecoins at 1:1 ratio, always.</p>
       </div>
       <div className={classes.from}>
-        <TokenSelect className={classes.fromSelect} options={tokenOptions} value={tokenFromName} disabled={[tokenToName]}
-                     onSelectionChanged={t => setTokenFromName(t)}/>
-        <TokenSend className={classes.fromForm} icon={tokenFrom.icon} name={tokenFrom.name} value={amount}
-                   address={tokenFrom.address} onValueChanged={v => setAmount(v)}/>
+        <BasketTokenSelect className={classes.fromSelect} value={0} excludes={tokenTo ? [tokenTo] : []}
+                           onTokenSelected={setTokenFrom}/>
+        {tokenFrom && <ERC20TokenInput value={amount} onValueChanged={setAmount} contract={tokenFrom.contract}/>}
       </div>
       <div className={classes.arrow}><img src={'/assets/icon/arrow-down.svg'} alt={'to'}/></div>
       <div className={classes.to}>
-        <TokenSelect className={classes.toSelect} options={tokenOptions} value={tokenToName} disabled={[tokenFromName]}
-                     onSelectionChanged={t => setTokenToName(t)}/>
-        <TokenReceived className={classes.toForm} icon={tokenTo.icon} name={tokenTo.name} address={tokenTo.address}
-                       disabled={true} value={amount}/>
+        <BasketTokenSelect className={classes.toSelect} value={-1} excludes={tokenFrom ? [tokenFrom] : []}
+                           onTokenSelected={setTokenTo}/>
+        {tokenTo && <ERC20TokenReceived amount={amount} contract={tokenTo.contract}/>}
       </div>
       <div className={classes.fee}>Swap Fee: 0.1%</div>
       <div className={classes.action}>
@@ -135,7 +111,7 @@ export const Swap: React.FC = () => {
         <p>Estimated Gas Fee: 0.01 ETH ($20 USD)</p>
       </div>
       <div className={classes.poolShare}>
-        <PoolShare/>
+        <BasketShares/>
       </div>
     </div>
   );

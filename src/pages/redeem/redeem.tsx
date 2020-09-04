@@ -2,8 +2,16 @@ import BigNumber from 'bignumber.js';
 import React from 'react';
 import {createUseStyles} from 'react-jss';
 import {HonestTheme} from '../../common/theme';
-import {Button, Checkbox, PoolShare, TokenReceived, TokenSend} from '../../components';
-import {useWallet, useContract} from '../../context';
+import {
+  BasketExpect,
+  BasketReceived,
+  BasketShares,
+  Button,
+  Checkbox,
+  ERC20TokenInput,
+  ERC20TokenUsed
+} from '../../components';
+import {useContract, useWallet} from '../../context';
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
   root: {
@@ -47,7 +55,8 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
   fee: {
     textAlign: 'right',
     fontSize: '14px',
-    color: theme.palette.textLighter
+    color: theme.palette.textLighter,
+    marginTop: `${theme.spacing(2)}px`
   },
   action: {
     textAlign: 'center',
@@ -81,30 +90,8 @@ export const Redeem: React.FC = () => {
   const [proportion, setProportion] = React.useState<boolean>(true);
 
   React.useEffect(() => {
-    wallet.getBalance(contract.hUSD.address).then(balance => setBalance(balance));
-  }, []);
-
-  const onAmountChanged = (value: BigNumber): void => {
-    setAmount(value);
-    setTokenAmounts(contract.tokens.reduce((pt, ct) => ({
-      ...pt,
-      [ct.name]: value.multipliedBy(ct.share)
-    }), {}));
-  };
-
-  const onTokenAmountChanged = (name: string, value: BigNumber): void => {
-    let amounts = {...tokenAmounts, [name]: value};
-    setTokenAmounts(amounts);
-    setAmount(Object.entries(amounts).map(([_, v]) => v).reduce((pv, cv) => pv.plus(cv)));
-  };
-
-  const getTokenMaxAmount = (name: string): BigNumber => {
-    const remainTokenAmounts = Object.entries(tokenAmounts).filter(([k, _]) => k !== name);
-    if (Object.keys(remainTokenAmounts).length === 0) {
-      return balance;
-    }
-    return balance.minus(remainTokenAmounts.map(([_, v]) => v).reduce((pv, cv) => pv.plus(cv)));
-  };
+    contract.hToken.getBalance(wallet.account).then(setBalance);
+  }, [contract, wallet]);
 
   const onProportionChanged = (value: boolean): void => {
     setProportion(value);
@@ -112,7 +99,14 @@ export const Redeem: React.FC = () => {
     setAmount(new BigNumber(0));
   };
 
-  const onRedeem = () => {};
+  const onAmountsChanged = (amounts: Record<string, BigNumber>) => {
+    setTokenAmounts(amounts);
+    setAmount(Object.entries(amounts).reduce((r, [_, value]) => r.plus(value), new BigNumber(0)));
+  };
+
+  const onRedeem = () => {
+    console.log(tokenAmounts);
+  };
 
   return (
     <div className={classes.root}>
@@ -121,8 +115,9 @@ export const Redeem: React.FC = () => {
         <p className={classes.subTitle}>Withdraw stablecoins to your wallet.</p>
       </div>
       <div className={classes.inputForm}>
-        <TokenSend icon={contract.hUSD.icon} name={contract.hUSD.name} disabled={!proportion}
-                   value={amount} address={contract.hUSD.address} onValueChanged={onAmountChanged}/>
+        {proportion ?
+          <ERC20TokenInput value={amount} onValueChanged={setAmount} contract={contract.hToken}/> :
+          <ERC20TokenUsed contract={contract.hToken} value={amount}/>}
         <p className={classes.proportion}>
           <Checkbox label={'Redeem with all assets proportionally'} initialValue={proportion}
                     onValueChanged={onProportionChanged}/>
@@ -130,20 +125,20 @@ export const Redeem: React.FC = () => {
       </div>
       <div className={classes.to}><img src={'/assets/icon/arrow-down.svg'} alt={'to'}/></div>
       <div className={classes.received}>
-        {contract.tokens.map(t => (
-          <TokenReceived key={t.name} className={classes.receivedItem} disabled={proportion}
-                         name={t.name} icon={t.icon} address={t.address} value={tokenAmounts[t.name] || new BigNumber(0)}
-                         maxAmount={getTokenMaxAmount(t.name)}
-                         onValueChanged={v => onTokenAmountChanged(t.name, v)}/>
-        ))}
-        {!proportion && <p className={classes.fee}>Redeem Fee: 0.1%</p>}
+        {proportion ?
+          <BasketReceived amount={amount} onAmountsChanged={setTokenAmounts}/> :
+          <>
+            <BasketExpect amount={balance} onAmountsChanged={onAmountsChanged}/>
+            <p className={classes.fee}>Redeem Fee: 0.1%</p>
+          </>
+        }
       </div>
       <div className={classes.action}>
         <p><Button label={'REDEEM hUSD'} onClick={onRedeem}/></p>
         <p>Estimated Gas Fee: 0.01 ETH ($20 USD)</p>
       </div>
       <div className={classes.poolShare}>
-        <PoolShare/>
+        <BasketShares/>
       </div>
     </div>
   );

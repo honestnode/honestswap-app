@@ -2,12 +2,13 @@ import BigNumber from 'bignumber.js';
 import {ethers} from 'ethers';
 import React, {createContext, useContext, useEffect, useRef, useState} from 'react';
 import {erc20ContractAbi} from '../common/contract';
-import {Unsupported} from '../pages/stage';
 import {EthereumEvents, EthereumRequests} from '../common/types';
+import {Unsupported} from '../pages/stage';
 
 export type AccountsChangedListener = (accounts: string[]) => void;
 
 export interface EthereumContext {
+  provider: ethers.providers.Web3Provider;
   getWallet: () => Promise<string[]>;
   connectWallet: () => Promise<string[]>;
   onAccountsChanged: (listener: AccountsChangedListener) => void;
@@ -30,11 +31,11 @@ export const EthereumProvider: React.FC = ({children}) => {
   const erc20Contracts = useRef<Record<string, ERC20Token>>({});
   const [context, setContext] = useState<EthereumContext>();
 
-  const getWallet = () => {
+  const getWallet = async (): Promise<string[]> => {
     return window.ethereum.request?.({method: EthereumRequests.GET_ACCOUNTS}) as Promise<string[]>;
   };
 
-  const connectWallet = () => {
+  const connectWallet = async (): Promise<string[]> => {
     return window.ethereum.request?.({method: EthereumRequests.CONNECT}) as Promise<string[]>;
   };
 
@@ -46,7 +47,7 @@ export const EthereumProvider: React.FC = ({children}) => {
     window.ethereum.removeListener?.(EthereumEvents.ACCOUNTS_CHANGED, listener);
   };
 
-  const getNetwork = async () : Promise<string> => {
+  const getNetwork = async (): Promise<string> => {
     if (provider.current) {
       return provider.current?.getNetwork().then(n => n.name);
     } else {
@@ -54,7 +55,7 @@ export const EthereumProvider: React.FC = ({children}) => {
     }
   };
 
-  const loadContract = async (token: string) : Promise<ERC20Token> => {
+  const loadContract = async (token: string): Promise<ERC20Token> => {
     const handler = new ethers.Contract(token, erc20ContractAbi, provider.current);
     return handler.decimals().then((decimals: number) => ({
       address: token,
@@ -63,8 +64,8 @@ export const EthereumProvider: React.FC = ({children}) => {
     }));
   };
 
-  const getBalance = async (address: string, token: string) : Promise<BigNumber> => {
-    if(!erc20Contracts.current[address]) {
+  const getBalance = async (address: string, token: string): Promise<BigNumber> => {
+    if (!erc20Contracts.current[address]) {
       erc20Contracts.current[token] = await loadContract(token);
     }
     return (erc20Contracts.current[token].handler.balanceOf(address) as Promise<ethers.BigNumber>).then(n => new BigNumber(n.toString()).shiftedBy(-erc20Contracts.current[token].decimals));
@@ -72,15 +73,16 @@ export const EthereumProvider: React.FC = ({children}) => {
 
   useEffect(() => {
     if (window.ethereum && window.ethereum.isMetaMask) {
-      provider.current = new ethers.providers.Web3Provider(window.ethereum)
+      provider.current = new ethers.providers.Web3Provider(window.ethereum);
       setContext({
+        provider: provider.current,
         getWallet,
         connectWallet,
         onAccountsChanged,
         offAccountsChanged,
         getNetwork,
         getBalance
-      })
+      });
     }
   }, []);
 
