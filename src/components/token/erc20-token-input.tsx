@@ -89,7 +89,7 @@ export const ERC20TokenInput: FC<ERC20TokenInputProps> = props => {
     if (!token?.balance) {
       return;
     }
-    !disabled && onValueChanged(new BigNumber(100));
+    !disabled && onValueChanged(token.balance);
   };
 
   return token ? (

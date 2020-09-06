@@ -29,7 +29,7 @@ export const BasketExpect: FC<BasketExpectProps> = props => {
   const basket = useBasket();
 
   const [amounts, setAmounts] = useState<Record<string, BigNumber>>(
-    basket.tokens.reduce((m, t) => ({...m, [t.symbol]: new BigNumber(0)}), {})
+    Object.values(basket.tokens).reduce((m, t) => ({...m, [t.symbol]: new BigNumber(0)}), {})
   );
 
   const onValueChanged = (symbol: string, value: BigNumber) => {
@@ -44,7 +44,7 @@ export const BasketExpect: FC<BasketExpectProps> = props => {
 
   return (
     <div className={clsx(classes.root, className)}>
-      {basket.tokens.map(token =>
+      {Object.values(basket.tokens).map(token =>
         <ERC20TokenExpect className={classes.item} key={token.symbol} balance={balance(token.symbol)} value={amounts[token.symbol]}
                           onValueChanged={value => onValueChanged(token.symbol, value)} contract={token.contract}/>
       )}

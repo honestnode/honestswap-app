@@ -1,203 +1,184 @@
+import BigNumber from 'bignumber.js';
+import {ethers} from 'ethers';
 import {erc20Abi, ERC20Contract} from './erc20-contract';
 import {EthereumContractProvider} from './ethereum-contract';
 
 const abi = [
   ...erc20Abi,
-  // collectInterest() : {totalInterestGained, newSupply}
+
+  // mint(token: string, amount: BigNumber) : BigNumber
   {
-    constant: false,
-    inputs: [],
-    name: "collectInterest",
-    outputs: [
+    'constant': false,
+    'inputs': [
       {
-        internalType: "uint256",
-        name: "totalInterestGained",
-        type: "uint256"
+        'internalType': 'address',
+        'name': '_basset',
+        'type': 'address'
       },
       {
-        internalType: "uint256",
-        name: "newSupply",
-        type: "uint256"
+        'internalType': 'uint256',
+        'name': '_bassetQuantity',
+        'type': 'uint256'
       }
     ],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function"
+    'name': 'mint',
+    'outputs': [
+      {
+        'internalType': 'uint256',
+        'name': 'hAssetMinted',
+        'type': 'uint256'
+      }
+    ],
+    'payable': false,
+    'stateMutability': 'nonpayable',
+    'type': 'function'
   },
+
+  // mintMulti(tokens: string[], amounts: BigNumber[], string: address): BigNumber
   {
-    constant: false,
-    inputs: [
+    'constant': false,
+    'inputs': [
       {
-        internalType: "address",
-        name: "_bAsset",
-        type: "address"
+        'internalType': 'address[]',
+        'name': '_bAssets',
+        'type': 'address[]'
       },
       {
-        internalType: "uint256",
-        name: "_bAssetQuantity",
-        type: "uint256"
-      }
-    ],
-    name: "mint",
-    outputs: [
+        'internalType': 'uint256[]',
+        'name': '_bassetQuantity',
+        'type': 'uint256[]'
+      },
       {
-        internalType: "uint256",
-        name: "massetMinted",
-        type: "uint256"
+        'internalType': 'address',
+        'name': '_recipient',
+        'type': 'address'
       }
     ],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function"
+    'name': 'mintMulti',
+    'outputs': [
+      {
+        'internalType': 'uint256',
+        'name': 'hAssetMinted',
+        'type': 'uint256'
+      }
+    ],
+    'payable': false,
+    'stateMutability': 'nonpayable',
+    'type': 'function'
   },
+
+  // redeem(token: string, amount: BigNumber):BigNumber
   {
-    constant: false,
-    inputs: [
+    'constant': false,
+    'inputs': [
       {
-        internalType: "address[]",
-        name: "_bAssets",
-        type: "address[]"
+        'internalType': 'address',
+        'name': '_basset',
+        'type': 'address'
       },
       {
-        internalType: "uint256[]",
-        name: "_bAssetQuantity",
-        type: "uint256[]"
-      },
-      {
-        internalType: "address",
-        name: "_recipient",
-        type: "address"
+        'internalType': 'uint256',
+        'name': '_bassetQuantity',
+        'type': 'uint256'
       }
     ],
-    name: "mintMulti",
-    outputs: [
+    'name': 'redeem',
+    'outputs': [
       {
-        internalType: "uint256",
-        name: "massetMinted",
-        type: "uint256"
+        'internalType': 'uint256',
+        'name': 'hAssetRedeemed',
+        'type': 'uint256'
       }
     ],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function"
+    'payable': false,
+    'stateMutability': 'nonpayable',
+    'type': 'function'
   },
+
+  // redeemHasset(amount: BigNumber, address: string): []
   {
-    constant: false,
-    inputs: [
+    'constant': false,
+    'inputs': [
       {
-        internalType: "address",
-        name: "_bAsset",
-        type: "address"
+        'internalType': 'uint256',
+        'name': '_mAssetQuantity',
+        'type': 'uint256'
       },
       {
-        internalType: "uint256",
-        name: "_bAssetQuantity",
-        type: "uint256"
+        'internalType': 'address',
+        'name': '_recipient',
+        'type': 'address'
       }
     ],
-    name: "redeem",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "massetRedeemed",
-        type: "uint256"
-      }
-    ],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function"
+    'name': 'redeemHasset',
+    'outputs': [],
+    'payable': false,
+    'stateMutability': 'nonpayable',
+    'type': 'function'
   },
+
+  // redeemMulti(tokens: string[], amounts: BigNumber[], address: string): BigNumber
   {
-    constant: false,
-    inputs: [
+    'constant': false,
+    'inputs': [
       {
-        internalType: "uint256",
-        name: "_mAssetQuantity",
-        type: "uint256"
+        'internalType': 'address[]',
+        'name': '_bAssets',
+        'type': 'address[]'
       },
       {
-        internalType: "address",
-        name: "_recipient",
-        type: "address"
+        'internalType': 'uint256[]',
+        'name': '_bassetQuantities',
+        'type': 'uint256[]'
+      },
+      {
+        'internalType': 'address',
+        'name': '_recipient',
+        'type': 'address'
       }
     ],
-    name: "redeemMasset",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function"
-  },
-  {
-    constant: false,
-    inputs: [
+    'name': 'redeemMulti',
+    'outputs': [
       {
-        internalType: "address[]",
-        name: "_bAssets",
-        type: "address[]"
-      },
-      {
-        internalType: "uint256[]",
-        name: "_bAssetQuantities",
-        type: "uint256[]"
-      },
-      {
-        internalType: "address",
-        name: "_recipient",
-        type: "address"
+        'internalType': 'uint256',
+        'name': 'hAssetRedeemed',
+        'type': 'uint256'
       }
     ],
-    name: "redeemMulti",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "massetRedeemed",
-        type: "uint256"
-      }
-    ],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function"
-  },
-  {
-    constant: false,
-    inputs: [
-      {
-        internalType: "address",
-        name: "_input",
-        type: "address"
-      },
-      {
-        internalType: "address",
-        name: "_output",
-        type: "address"
-      },
-      {
-        internalType: "uint256",
-        name: "_quantity",
-        type: "uint256"
-      },
-      {
-        internalType: "address",
-        name: "_recipient",
-        type: "address"
-      }
-    ],
-    name: "swap",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "output",
-        type: "uint256"
-      }
-    ],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function"
-  },
+    'payable': false,
+    'stateMutability': 'nonpayable',
+    'type': 'function'
+  }
 ];
 
 export class HTokenContract extends ERC20Contract {
   constructor(address: string, provider: EthereumContractProvider) {
     super(address, provider, abi);
+  }
+
+  public async mint(token: string, amount: BigNumber): Promise<BigNumber> {
+    const decimals = await this.getDecimals();
+    const finalAmount = amount.shiftedBy(decimals);
+    const result: Promise<ethers.BigNumber> = this._handler.mint(token, ethers.BigNumber.from(finalAmount.toString()));
+    return result.then(a => new BigNumber(a.toString()).shiftedBy(-decimals));
+  }
+
+  public async mintMulti(amounts: Record<string, BigNumber>): Promise<BigNumber> {
+    const decimals = await this.getDecimals();
+    const result: Promise<ethers.BigNumber> = this._handler.mintMulti(
+      Object.keys(amounts), Object.values(amounts).map(a => ethers.BigNumber.from(a.toString())));
+    return result.then(a => new BigNumber(a.toString()).shiftedBy(-decimals));
+  }
+
+  public async redeemProportionally(amount: BigNumber): Promise<void> {
+    const decimals = await this.getDecimals();
+    return this._handler.redeemHasset(ethers.BigNumber.from(amount.shiftedBy(decimals)));
+  }
+
+  public async redeemManually(amounts: Record<string, BigNumber>): Promise<BigNumber> {
+    const decimals = await this.getDecimals();
+    const result: Promise<ethers.BigNumber> = this._handler.redeemMulti(
+      Object.keys(amounts), Object.values(amounts).map(a => ethers.BigNumber.from(a.toString())));
+    return result.then(a => new BigNumber(a.toString()).shiftedBy(-decimals));
   }
 }

@@ -1,9 +1,10 @@
 import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
-import React, {FC, useCallback, useMemo} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import {createUseStyles} from 'react-jss';
 import {HonestTheme} from '../../common/theme';
 import {useBasket} from '../../context';
+import {BasketTokenBalance} from '../../contract';
 import {ComponentProps} from '../component-props';
 import {ERC20TokenReceived} from '../token';
 
@@ -28,19 +29,23 @@ export const BasketReceived: FC<BasketReceivedProps> = props => {
   const classes = useStyles();
   const basket = useBasket();
 
-  const amounts = useMemo<Record<string, BigNumber>>(() => {
-    return basket.tokens.reduce((r, t) => ({...r, [t.symbol]: amount.multipliedBy(t.ratio)}), {});
-  }, [amount, basket]);
+  const [balances, setBalances] = useState<Record<string, BasketTokenBalance>>({});
 
-  useCallback(() => {
-    onAmountsChanged(amounts);
-  }, [amounts]);
+  React.useEffect(() => {
+    basket.contract.getTokenBalances().then(balances => {
+      setBalances(balances);
+    });
+  }, []);
+
+  useEffect(() => {
+    onAmountsChanged(Object.fromEntries(Object.entries(balances).map(([key, value]) => [key, amount.multipliedBy(value.ratio)])));
+  }, [amount, balances]);
 
   return (
     <div className={clsx(classes.root, className)}>
-      {basket.tokens.map(token =>
+      {Object.values(basket.tokens).map(token =>
         <ERC20TokenReceived className={classes.item} key={token.symbol} contract={token.contract}
-                            amount={amounts[token.symbol]}/>
+                            amount={amount.multipliedBy(balances[token.symbol]?.ratio || new BigNumber(0))}/>
       )}
     </div>
   );

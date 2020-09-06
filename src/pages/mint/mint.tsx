@@ -91,6 +91,7 @@ export const Mint: React.FC = () => {
   const contract = useContract();
   const wallet = useWallet();
 
+  const [values, setValues] = React.useState<Record<string, BigNumber>>({});
   const [amount, setAmount] = React.useState<BigNumber>(new BigNumber(0));
   const [balance, setBalance] = React.useState<BigNumber>(new BigNumber(0));
 
@@ -98,8 +99,19 @@ export const Mint: React.FC = () => {
     contract.hToken.getBalance(wallet.account).then(setBalance);
   }, [contract, wallet]);
 
-  const onMint = () => {
+  const onValuesChanged = (values: Record<string, BigNumber>) => {
+    setValues(values);
+    if (Object.keys(values).length === 0) {
+      setAmount(new BigNumber(0));
+    }
+    setAmount(Object.entries(values).map(([_, v]) => v).reduce((pv, cv) => pv.plus(cv)));
+  };
 
+  const onMint = () => {
+    Object.entries(values).forEach(([key, value]) => {
+      console.log(key, value.toString());
+    });
+    // contract.hToken.mint();
   };
 
   return (
@@ -109,7 +121,7 @@ export const Mint: React.FC = () => {
         <p className={classes.subTitle}>Deposit stablecoins, get hUSD at 1:1 ratio.</p>
       </div>
       <div className={classes.poolInput}>
-        <BasketInput onTotalValueChanged={setAmount}/>
+        <BasketInput onValuesChanged={onValuesChanged}/>
       </div>
       <div className={classes.to}><img src={'/assets/icon/arrow-down.svg'} alt={'to'}/></div>
       <div className={classes.received}>

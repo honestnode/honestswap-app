@@ -4,7 +4,7 @@ import {createUseStyles} from 'react-jss';
 import {HonestTheme} from '../../common/theme';
 import {BasketShares, BasketTokenSelect, ERC20TokenInput, ERC20TokenReceived} from '../../components';
 import {Button} from '../../components/button';
-import {BasketToken} from '../../contract';
+import {BasketTokenBalance} from '../../contract';
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
   root: {
@@ -80,8 +80,8 @@ export const Swap: React.FC = () => {
 
   const classes = useStyles();
 
-  const [tokenFrom, setTokenFrom] = useState<BasketToken>();
-  const [tokenTo, setTokenTo] = useState<BasketToken>();
+  const [tokenFrom, setTokenFrom] = useState<BasketTokenBalance>();
+  const [tokenTo, setTokenTo] = useState<BasketTokenBalance>();
   const [amount, setAmount] = React.useState<BigNumber>(new BigNumber(0));
 
   React.useEffect(() => {

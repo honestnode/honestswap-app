@@ -30,7 +30,7 @@ export const BasketTokenSelect: FC<BasketTokenSelectProps> = props => {
   const {className, value = 0, excludes = [], onTokenSelected} = props;
   const classes = useStyles();
   const basket = useBasket();
-  const [selection, setSelection] = useState<BasketToken>(basket.tokens[value >= 0 ? value : basket.tokens.length + value]);
+  const [selection, setSelection] = useState<BasketToken>(Object.values(basket.tokens)[value >= 0 ? value : Object.values(basket.tokens).length + value]);
 
   useEffect(() => {
     onCheckChanged(true, selection);
@@ -45,7 +45,7 @@ export const BasketTokenSelect: FC<BasketTokenSelectProps> = props => {
 
   return (
     <div className={clsx(classes.root, className)}>
-      {basket.tokens.map(o =>
+      {Object.values(basket.tokens).map(o =>
         <ToggleButton className={classes.item} key={o.symbol} label={o.symbol} checked={selection === o}
                       readonly={selection === o}
                       disabled={excludes.includes(o)} onCheckChanged={v => onCheckChanged(v, o)}/>

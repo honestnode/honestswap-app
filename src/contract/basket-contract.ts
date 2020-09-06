@@ -5,421 +5,6 @@ import {EthereumContract, EthereumContractProvider} from './ethereum-contract';
 
 const abi = [
   {
-    anonymous: false,
-    inputs: [],
-    name: "BasketStatusChanged",
-    type: "event"
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "address[]",
-        name: "bAssets",
-        type: "address[]"
-      },
-      {
-        indexed: false,
-        internalType: "uint256[]",
-        name: "maxWeights",
-        type: "uint256[]"
-      }
-    ],
-    name: "BasketWeightsUpdated",
-    type: "event"
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "bAsset",
-        type: "address"
-      },
-      {
-        indexed: false,
-        internalType: "address",
-        name: "integrator",
-        type: "address"
-      }
-    ],
-    name: "BassetAdded",
-    type: "event"
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "bAsset",
-        type: "address"
-      }
-    ],
-    name: "BassetRemoved",
-    type: "event"
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "bAsset",
-        type: "address"
-      },
-      {
-        indexed: false,
-        internalType: "enum MassetStructs.BassetStatus",
-        name: "status",
-        type: "uint8"
-      }
-    ],
-    name: "BassetStatusChanged",
-    type: "event"
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "address",
-        name: "account",
-        type: "address"
-      }
-    ],
-    name: "Paused",
-    type: "event"
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "bAsset",
-        type: "address"
-      },
-      {
-        indexed: false,
-        internalType: "bool",
-        name: "enabled",
-        type: "bool"
-      }
-    ],
-    name: "TransferFeeEnabled",
-    type: "event"
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "address",
-        name: "account",
-        type: "address"
-      }
-    ],
-    name: "Unpaused",
-    type: "event"
-  },
-  {
-    constant: false,
-    inputs: [
-      {
-        internalType: "address",
-        name: "_bAsset",
-        type: "address"
-      },
-      {
-        internalType: "address",
-        name: "_integration",
-        type: "address"
-      },
-      {
-        internalType: "bool",
-        name: "_isTransferFeeCharged",
-        type: "bool"
-      }
-    ],
-    name: "addBasset",
-    outputs: [
-      {
-        internalType: "uint8",
-        name: "index",
-        type: "uint8"
-      }
-    ],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function"
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: "basket",
-    outputs: [
-      {
-        internalType: "uint8",
-        name: "maxBassets",
-        type: "uint8"
-      },
-      {
-        internalType: "bool",
-        name: "undergoingRecol",
-        type: "bool"
-      },
-      {
-        internalType: "bool",
-        name: "failed",
-        type: "bool"
-      },
-      {
-        internalType: "uint256",
-        name: "collateralisationRatio",
-        type: "uint256"
-      }
-    ],
-    payable: false,
-    stateMutability: "view",
-    type: "function"
-  },
-  {
-    constant: false,
-    inputs: [],
-    name: "collectInterest",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "interestCollected",
-        type: "uint256"
-      },
-      {
-        internalType: "uint256[]",
-        name: "gains",
-        type: "uint256[]"
-      }
-    ],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function"
-  },
-  {
-    constant: false,
-    inputs: [
-      {
-        internalType: "uint8",
-        name: "_bAssetIndex",
-        type: "uint8"
-      },
-      {
-        internalType: "address",
-        name: "",
-        type: "address"
-      },
-      {
-        internalType: "uint256",
-        name: "_decreaseAmount",
-        type: "uint256"
-      }
-    ],
-    name: "decreaseVaultBalance",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function"
-  },
-  {
-    constant: false,
-    inputs: [
-      {
-        internalType: "uint8[]",
-        name: "_bAssetIndices",
-        type: "uint8[]"
-      },
-      {
-        internalType: "address[]",
-        name: "",
-        type: "address[]"
-      },
-      {
-        internalType: "uint256[]",
-        name: "_decreaseAmount",
-        type: "uint256[]"
-      }
-    ],
-    name: "decreaseVaultBalances",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function"
-  },
-  {
-    constant: false,
-    inputs: [
-      {
-        internalType: "address",
-        name: "_bAsset",
-        type: "address"
-      }
-    ],
-    name: "failBasset",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function"
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: "getBasket",
-    outputs: [
-      {
-        components: [
-          {
-            components: [
-              {
-                internalType: "address",
-                name: "addr",
-                type: "address"
-              },
-              {
-                internalType: "enum MassetStructs.BassetStatus",
-                name: "status",
-                type: "uint8"
-              },
-              {
-                internalType: "bool",
-                name: "isTransferFeeCharged",
-                type: "bool"
-              },
-              {
-                internalType: "uint256",
-                name: "ratio",
-                type: "uint256"
-              },
-              {
-                internalType: "uint256",
-                name: "maxWeight",
-                type: "uint256"
-              },
-              {
-                internalType: "uint256",
-                name: "vaultBalance",
-                type: "uint256"
-              }
-            ],
-            internalType: "struct MassetStructs.Basset[]",
-            name: "bassets",
-            type: "tuple[]"
-          },
-          {
-            internalType: "uint8",
-            name: "maxBassets",
-            type: "uint8"
-          },
-          {
-            internalType: "bool",
-            name: "undergoingRecol",
-            type: "bool"
-          },
-          {
-            internalType: "bool",
-            name: "failed",
-            type: "bool"
-          },
-          {
-            internalType: "uint256",
-            name: "collateralisationRatio",
-            type: "uint256"
-          }
-        ],
-        internalType: "struct MassetStructs.Basket",
-        name: "b",
-        type: "tuple"
-      }
-    ],
-    payable: false,
-    stateMutability: "view",
-    type: "function"
-  },
-  {
-    constant: true,
-    inputs: [
-      {
-        internalType: "address",
-        name: "_bAsset",
-        type: "address"
-      }
-    ],
-    name: "getBasset",
-    outputs: [
-      {
-        components: [
-          {
-            internalType: "address",
-            name: "addr",
-            type: "address"
-          },
-          {
-            internalType: "enum MassetStructs.BassetStatus",
-            name: "status",
-            type: "uint8"
-          },
-          {
-            internalType: "bool",
-            name: "isTransferFeeCharged",
-            type: "bool"
-          },
-          {
-            internalType: "uint256",
-            name: "ratio",
-            type: "uint256"
-          },
-          {
-            internalType: "uint256",
-            name: "maxWeight",
-            type: "uint256"
-          },
-          {
-            internalType: "uint256",
-            name: "vaultBalance",
-            type: "uint256"
-          }
-        ],
-        internalType: "struct MassetStructs.Basset",
-        name: "bAsset",
-        type: "tuple"
-      }
-    ],
-    payable: false,
-    stateMutability: "view",
-    type: "function"
-  },
-  {
-    constant: true,
-    inputs: [
-      {
-        internalType: "address",
-        name: "_bAsset",
-        type: "address"
-      }
-    ],
-    name: "getBassetIntegrator",
-    outputs: [
-      {
-        internalType: "address",
-        name: "integrator",
-        type: "address"
-      }
-    ],
-    payable: false,
-    stateMutability: "view",
-    type: "function"
-  },
-  {
     constant: true,
     inputs: [],
     name: "getBassets",
@@ -1129,17 +714,52 @@ const abi = [
 export interface BasketToken {
   symbol: string;
   contract: ERC20Contract;
+  decimals: number;
+}
+
+export interface BasketTokenBalance extends BasketToken {
   ratio: BigNumber;
   balance: BigNumber;
 }
 
 export class BasketContract extends EthereumContract {
 
+  private _tokens: Record<string, BasketToken> | undefined;
+
   constructor(address: string, provider: EthereumContractProvider) {
     super(address, abi, provider);
   }
 
-  public async getTokens(): Promise<BasketToken[]> {
+  public async getTokens(): Promise<Record<string, BasketToken>> {
+    if (this._tokens === undefined) {
+      const result: {
+        bAssets: {
+          addr: string;
+          status: number;
+          isTransferFeeCharged: boolean;
+          ratio: ethers.BigNumber;
+          maxWeight: ethers.BigNumber;
+          vaultBalance: ethers.BigNumber;
+        }[]
+      } = await this._handler.getBassets();
+      let tokens: Record<string, BasketToken> = {};
+      for (const asset of result.bAssets) {
+        const contract = new ERC20Contract(asset.addr, this._provider);
+        const symbol = await contract.getSymbol();
+        const decimals = await contract.getDecimals();
+        tokens[asset.addr] = {symbol, contract, decimals};
+      }
+      this._tokens = tokens;
+    }
+    return this._tokens;
+  }
+
+  public async getToken(token: string): Promise<BasketToken> {
+    const tokens = await this.getTokens();
+    return tokens[token];
+  }
+
+  public async getTokenBalances(): Promise<Record<string, BasketTokenBalance>> {
     const result : {
       bAssets: {
         addr: string;
@@ -1150,20 +770,27 @@ export class BasketContract extends EthereumContract {
         vaultBalance: ethers.BigNumber;
       }[]
     } = await this._handler.getBassets();
-    let tokens: BasketToken[] = [];
+    const tokens = await this.getTokens();
+    let balances: BasketTokenBalance[] = [];
     for(const asset of result.bAssets) {
-      const contract = new ERC20Contract(asset.addr, this._provider);
-      const symbol = await contract.getSymbol();
-      const decimals = await contract.getDecimals();
-      const balance = new BigNumber(asset.vaultBalance.toString()).shiftedBy(-decimals);
-      tokens.push({
-        symbol: symbol,
-        contract: contract,
+      let token = tokens[asset.addr];
+      if (token === undefined) {
+        const contract = new ERC20Contract(asset.addr, this._provider);
+        const symbol = await contract.getSymbol();
+        const decimals = await contract.getDecimals();
+        token = {symbol, contract, decimals};
+        this._tokens && (this._tokens[asset.addr] = token);
+      }
+      const balance = new BigNumber(asset.vaultBalance.toString()).shiftedBy(-token.decimals);
+      balances.push({
+        ...token,
         balance: balance,
         ratio: new BigNumber(0)
       });
     }
-    const totalBalance = tokens.reduce((a, t) => a.plus(t.balance), new BigNumber(0));
-    return tokens.map(t => ({...t, ratio: t.balance.div(totalBalance)}));
+    const totalBalance = balances.reduce((a, t) => a.plus(t.balance), new BigNumber(0));
+    return balances.reduce((m, b) => {
+      return {...m, [b.contract.address]: {...b, ratio: b.balance.div(totalBalance)}};
+    }, {});
   }
 }
