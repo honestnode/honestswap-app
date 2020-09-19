@@ -126,8 +126,7 @@ export const Mint: React.FC = () => {
   const estimateGas = () => {
     generateMintRequest().then(request => {
       if (Object.entries(request).length > 0) {
-        contract.hToken.estimateMintMulti(request).then(gas => {
-          console.log(gas.toString());
+        contract.hToken.estimateMintMultiTo(request, wallet.account).then(gas => {
           setEstimatedGas(gas);
         });
       }
@@ -140,24 +139,24 @@ export const Mint: React.FC = () => {
       const amount = values[symbol].amount;
       if (amount.gt(new BigNumber(0))) {
         const token = await contract.basket.getToken(symbol);
-        request[token.contract.address] = amount;
+        request[token.contract.address] = amount.shiftedBy(token.decimals);
       }
     }
     return request;
   };
 
   const onMint = async () => {
-    // if (amount.lte(new BigNumber(0))) {
+    if (amount.lte(new BigNumber(0))) {
       // TODO: handle exception
-      // console.error('Amount should be greater than 0');
-      // return;
-    // }
+      console.error('Amount should be greater than 0');
+      return;
+    }
     setMintable(false);
     try {
       const request: Record<string, BigNumber> = await generateMintRequest();
       //await contract.hToken.mintMulti(request);
-      const gas = await contract.hToken.mintMulti(request);
-      console.log(gas.toString());
+      await contract.hToken.mintMultiTo(request, wallet.account);
+
     } catch (ex) {
       // TODO: handle exception
       console.error(ex);

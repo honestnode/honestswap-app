@@ -18,11 +18,11 @@ export const SavingProvider : FC = ({children}) => {
   const contract = useContract();
 
   useEffect(() => {
-    contract.saving.getRawBalance().then(balance => {
-      contract.hToken.getDecimals().then(decimals => setContext({
+    contract.saving.getTotalBalance().then(balance => {
+      setContext({
         ...context,
-        balance: balance.shiftedBy(-decimals)
-      }));
+        balance: balance
+      })
     });
   }, [wallet, contract]);
 

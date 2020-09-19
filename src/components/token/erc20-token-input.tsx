@@ -52,6 +52,7 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
     marginRight: `${theme.spacing(2)}px`
   },
   allowance: {
+    marginTop: `${theme.spacing(2)}px`,
     display: 'flex',
     alignItems: 'center',
   },
@@ -117,17 +118,18 @@ export const ERC20TokenInput: FC<ERC20TokenInputProps> = props => {
         balance: balance || r.balance
       });
     });
-  }, [contract]);
+  }, [contract, balance]);
 
   useEffect(() => {
-    if (spender && value.gt(new BigNumber(0))) {
-      timer.current && clearTimeout(timer.current);
-      timer.current = setTimeout(() => {
+    timer.current && clearTimeout(timer.current);
+    timer.current = setTimeout(() => {
+      if (spender && value.gt(new BigNumber(0))) {
         validateAllowance(spender);
-      }, 500);
-    } else {
-      setAllowance(new BigNumber(0));
-    }
+      } else {
+        setAllowance(new BigNumber(0));
+        onValueChanged(value, true);
+      }
+    }, 500);
   }, [value]);
 
   const onInputChanged = (e: ChangeEvent<HTMLInputElement>) => {
@@ -182,7 +184,7 @@ export const ERC20TokenInput: FC<ERC20TokenInputProps> = props => {
 
   return token ? (
     <div className={clsx(classes.container, className)}>
-      <div className={clsx(classes.root, className)}>
+      <div className={classes.root}>
         <TokenHeader className={classes.header} icon={token.icon} name={token.name} symbol={token.symbol}/>
         <input className={classes.amount} type={'number'} disabled={disabled} onFocus={e => {e.target.select();}}
                value={value.toString()} onChange={onInputChanged}/>

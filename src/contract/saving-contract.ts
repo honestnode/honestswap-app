@@ -452,6 +452,21 @@ const _abi = [
     "type": "function"
   },
   {
+    "constant": true,
+    "inputs": [],
+    "name": "totalValue",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "constant": false,
     "inputs": [],
     "name": "updateApy",
@@ -559,23 +574,50 @@ export class SavingContract extends EthereumContract {
     super(address, _abi, provider);
   }
 
+  public async estimateDepositGas(amount: BigNumber) : Promise<BigNumber> {
+    const price = await this._provider.getGasPrice();
+    const result: Promise<ethers.BigNumber> = this._handler.estimateGas.deposit(ethers.BigNumber.from(amount.toString()));
+    return result.then(a => new BigNumber(a.mul(price).toString()).shiftedBy(-18));
+  }
+
+  public async estimateWithdrawGas(amount: BigNumber) : Promise<BigNumber> {
+    const price = await this._provider.getGasPrice();
+    const result: Promise<ethers.BigNumber> = this._handler.estimateGas.withdraw(ethers.BigNumber.from(amount.toString()));
+    return result.then(a => new BigNumber(a.mul(price).toString()).shiftedBy(-18));
+  }
+
   public async depositRaw(amount: BigNumber): Promise<BigNumber> {
     const result: Promise<ethers.BigNumber> = this._handler.deposit(ethers.BigNumber.from(amount.toString()));
     return result.then(r => new BigNumber(r.toString()));
   }
 
   public async withdrawRaw(amount: BigNumber): Promise<BigNumber> {
-    const result: Promise<ethers.BigNumber> = this._handler.redeem(ethers.BigNumber.from(amount.toString()));
+    const result: Promise<ethers.BigNumber> = this._handler.withdraw(ethers.BigNumber.from(amount.toString()));
     return result.then(r => new BigNumber(r.toString()));
   }
 
-  public getRawBalance() : Promise<BigNumber> {
-    const result : Promise<ethers.BigNumber> = this._handler.querySavingBalance();
-    return result.then(r => new BigNumber(r.toString()));
+  public getTotalBalance() : Promise<BigNumber> {
+    const result : Promise<ethers.BigNumber> = this._handler.totalValue();
+    return result.then(r => new BigNumber(r.toString()).shiftedBy(-18));
   }
 
   public getApy() : Promise<BigNumber> {
     const result : Promise<ethers.BigNumber> = this._handler.apy();
+    return result.then(r => new BigNumber(r.toString()).shiftedBy(-18));
+  }
+
+  public sharesOf(account: string): Promise<BigNumber> {
+    const result: Promise<ethers.BigNumber> = this._handler.sharesOf(account);
+    return result.then(r => new BigNumber(r.toString()).shiftedBy(-18));
+  }
+
+  public totalShares(): Promise<BigNumber> {
+    const result: Promise<ethers.BigNumber> = this._handler.totalShares();
+    return result.then(r => new BigNumber(r.toString()).shiftedBy(-18));
+  }
+
+  public savingsOf(account: string): Promise<BigNumber> {
+    const result: Promise<ethers.BigNumber> = this._handler.savingsOf(account);
     return result.then(r => new BigNumber(r.toString()).shiftedBy(-18));
   }
 }

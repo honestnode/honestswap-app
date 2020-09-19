@@ -632,13 +632,34 @@ export class BasketContract extends EthereumContract {
     const result: Record<string, BasketTokenBalance> = {};
     const totalBalance = new BigNumber(balances[0].toString());
     for(let i = 0; i < tokens.length; ++i) {
-      const balance = new BigNumber(balances[1][i].toString()).shiftedBy(-tokens[i].decimals);
-      result[tokens[i].contract.address] = {
+      const balance = new BigNumber(balances[1][i].toString());
+      result[tokens[i].symbol] = {
         ...tokens[i],
-        balance,
+        balance: balance.shiftedBy(-18),
         ratio: totalBalance.isZero() ? new BigNumber(0) : balance.div(totalBalance)
       };
     }
     return result;
+  }
+
+  public async getTokenBalance(symbol: string): Promise<BigNumber> {
+    const tokens: BasketToken[] = (await this.getTokensRemote()).filter(t => t.symbol === symbol);
+    const balances: GetAssetBalancesResponse = await this._handler.getBAssetsBalance(tokens.map(t => t.contract.address));
+    if (balances[1].length !== 1) {
+      return new BigNumber(0);
+    } else {
+      return new BigNumber(balances[1][0].toString()).shiftedBy(-18);
+    }
+  }
+
+  public async estimateSwapGas(from: string, to: string, amount: BigNumber, recipient: string): Promise<BigNumber> {
+    const price = await this._provider.getGasPrice();
+    const result: Promise<ethers.BigNumber> = this._handler.estimateGas.swap(from, to, ethers.BigNumber.from(amount.toString()), recipient);
+    return result.then(a => new BigNumber(a.mul(price).toString()).shiftedBy(-18));
+  }
+
+  public async swap(from: string, to: string, amount: BigNumber, recipient: string): Promise<boolean> {
+    const result: Promise<ethers.BigNumber> = this._handler.swap(from, to, ethers.BigNumber.from(amount.toString()), recipient);
+    return result.then(() => true);
   }
 }

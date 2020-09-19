@@ -3,7 +3,7 @@ import React, {useEffect, useState} from 'react';
 import {createUseStyles} from 'react-jss';
 import {Numbers} from '../../common';
 import {HonestTheme} from '../../common/theme';
-import {useContract, useSaving, useWallet} from '../../context';
+import {useContract, useWallet} from '../../context';
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
   root: {
@@ -57,23 +57,31 @@ export const Essential: React.FC = () => {
   const classes = useStyles();
   const contract = useContract();
   const wallet = useWallet();
-  const saving = useSaving();
 
+  const [balance, setBalance] = useState<BigNumber>(new BigNumber(0));
   const [weight, setWeight] = useState<BigNumber>(new BigNumber(0));
   const [apy, setApy] = useState<BigNumber>(new BigNumber(0));
   const [share, setShare] = useState<BigNumber>(new BigNumber(0));
 
   useEffect(() => {
+    getBalance();
     contract.saving.getApy().then(setApy);
+    contract.saving.savingsOf(wallet.account).then(v => setWeight(v));
     let weight: BigNumber = new BigNumber(0), totalWeight: BigNumber = new BigNumber(1);
     Promise.all([
-      contract.weight.getWeight(wallet.account).then(w => weight = w),
-      contract.weight.getTotalWeight().then(tw => totalWeight = tw)
+      contract.saving.sharesOf(wallet.account).then(w => weight = w),
+      contract.saving.totalShares().then(w => totalWeight = w),
     ]).then(() => {
-      setWeight(weight);
-      setShare(weight.dividedBy(totalWeight));
+      setShare(totalWeight.isZero() ? new BigNumber(0) : weight.dividedBy(totalWeight));
     });
   }, [wallet, contract]);
+
+  const getBalance = async () => {
+    contract.saving.getTotalBalance().then(v => {
+      console.log(v.toString());
+      setBalance(v);
+    });
+  };
 
   return (
     <div className={classes.root}>
@@ -81,7 +89,7 @@ export const Essential: React.FC = () => {
         <div className={classes.column}>
           <p className={classes.leading}>Your hUSD Saving Balance</p>
           <p><span className={classes.number}>
-              {Numbers.format(saving.balance, {thousandsSeparate: true})}
+              {Numbers.format(balance, {thousandsSeparate: true})}
             <span className={classes.unit}>hUSD</span></span></p>
         </div>
         <div className={classes.column}>

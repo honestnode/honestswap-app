@@ -31,7 +31,6 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
   },
   chart: {
     flex: 'auto',
-    height: '32px',
     overflow: 'hidden'
   },
   bar: {

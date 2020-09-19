@@ -707,36 +707,50 @@ export class HTokenContract extends ERC20Contract {
     super(address, provider, abi);
   }
 
-  public async estimateMintMulti(amounts: Record<string, BigNumber>) : Promise<BigNumber> {
+  public async estimateMintMultiTo(amounts: Record<string, BigNumber>, account: string) : Promise<BigNumber> {
     const price = await this._provider.getGasPrice();
     const result: Promise<ethers.BigNumber> = this._handler.estimateGas.mintMultiTo(
-      Object.keys(amounts), Object.values(amounts).map(a => ethers.BigNumber.from(a.toString())), '0xB0De33f2e120FF7eA8A4A4DE71fF1A3Cb9729dA4');
+      Object.keys(amounts), Object.values(amounts).map(a => ethers.BigNumber.from(a.toString())), account);
     return result.then(a => new BigNumber(a.mul(price).toString()).shiftedBy(-18));
   }
 
-  public async mint(token: string, amount: BigNumber): Promise<BigNumber> {
+  public async mintTo(token: string, amount: BigNumber): Promise<BigNumber> {
     const decimals = await this.getDecimals();
     const finalAmount = amount.shiftedBy(decimals);
     const result: Promise<ethers.BigNumber> = this._handler.mint(token, ethers.BigNumber.from(finalAmount.toString()));
     return result.then(a => new BigNumber(a.toString()).shiftedBy(-decimals));
   }
 
-  public async mintMulti(amounts: Record<string, BigNumber>): Promise<BigNumber> {
+  public async mintMultiTo(amounts: Record<string, BigNumber>, account: string): Promise<BigNumber> {
     const decimals = await this.getDecimals();
     const result: Promise<ethers.BigNumber> = this._handler.mintMultiTo(
-      Object.keys(amounts), Object.values(amounts).map(a => ethers.BigNumber.from(a.toString())), '0xB0De33f2e120FF7eA8A4A4DE71fF1A3Cb9729dA4');
+      Object.keys(amounts), Object.values(amounts).map(a => ethers.BigNumber.from(a.toString())), account);
     return result.then(a => new BigNumber(a.toString()).shiftedBy(-decimals));
   }
 
-  public async redeemProportionally(amount: BigNumber): Promise<void> {
+  public async estimateRedeemProportionally(amount: BigNumber, account: string) : Promise<BigNumber> {
+    const price = await this._provider.getGasPrice();
     const decimals = await this.getDecimals();
-    return this._handler.redeemHasset(ethers.BigNumber.from(amount.shiftedBy(decimals)));
+    const result: Promise<ethers.BigNumber> = this._handler.estimateGas.redeemMultiInProportionTo(ethers.BigNumber.from(amount.shiftedBy(decimals).toString()), account);
+    return result.then(a => new BigNumber(a.mul(price).toString()).shiftedBy(-18));
   }
 
-  public async redeemManually(amounts: Record<string, BigNumber>): Promise<BigNumber> {
+  public async redeemProportionally(amount: BigNumber, account: string): Promise<void> {
     const decimals = await this.getDecimals();
-    const result: Promise<ethers.BigNumber> = this._handler.redeemMulti(
-      Object.keys(amounts), Object.values(amounts).map(a => ethers.BigNumber.from(a.toString())));
-    return result.then(a => new BigNumber(a.toString()).shiftedBy(-decimals));
+    return this._handler.redeemMultiInProportionTo(ethers.BigNumber.from(amount.shiftedBy(decimals).toString()), account);
+  }
+
+  public async estimateRedeemManually(amounts: Record<string, BigNumber>, account: string) : Promise<BigNumber> {
+    const price = await this._provider.getGasPrice();
+    const decimals = await this.getDecimals();
+    const result: Promise<ethers.BigNumber> = this._handler.estimateGas.redeemMultiTo(
+      Object.keys(amounts), Object.values(amounts).map(a => ethers.BigNumber.from(a.shiftedBy(decimals).toString())), account);
+    return result.then(a => new BigNumber(a.mul(price).toString()).shiftedBy(-18));
+  }
+
+  public async redeemManually(amounts: Record<string, BigNumber>, account: string): Promise<void> {
+    const decimals = await this.getDecimals();
+    return this._handler.redeemMultiTo(
+      Object.keys(amounts), Object.values(amounts).map(a => ethers.BigNumber.from(a.shiftedBy(decimals).toString())), account);
   }
 }

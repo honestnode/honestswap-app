@@ -69,7 +69,7 @@ export const ERC20TokenExpect: FC<ERC20TokenExpectProps> = props => {
 
   const onInputChanged = (e: ChangeEvent<HTMLInputElement>) => {
     let input = new BigNumber(e.target.value);
-    input = input.isNaN() ? new BigNumber(0) : (input.gt(balance) ? balance : input);
+    input = input.isNaN() ? new BigNumber(0) : (input.gt(balance) ? value : input);
     onValueChanged(input);
   };
 

@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
-import React from 'react';
+import React, {useEffect} from 'react';
 import {createUseStyles} from 'react-jss';
+import {Numbers} from '../../common';
 import {HonestTheme} from '../../common/theme';
 import {
   BasketExpect,
@@ -89,10 +90,17 @@ export const Redeem: React.FC = () => {
   const [amount, setAmount] = React.useState<BigNumber>(new BigNumber(0));
   const [tokenAmounts, setTokenAmounts] = React.useState<Record<string, BigNumber>>({});
   const [proportion, setProportion] = React.useState<boolean>(true);
+  const [estimatedGas, setEstimatedGas] = React.useState<BigNumber>(new BigNumber(0));
 
   React.useEffect(() => {
     contract.hToken.getBalance(wallet.account).then(setBalance);
   }, [contract, wallet]);
+
+  useEffect(() => {
+    if (amount.gt(new BigNumber(0))) {
+      estimateGas();
+    }
+  }, [amount]);
 
   const onProportionChanged = (value: boolean): void => {
     setProportion(value);
@@ -105,6 +113,32 @@ export const Redeem: React.FC = () => {
     setAmount(Object.entries(amounts).reduce((r, [_, value]) => r.plus(value), new BigNumber(0)));
   };
 
+  const generateRequest = async () => {
+    const request: Record<string, BigNumber> = {};
+    for (const symbol of Object.keys(tokenAmounts)) {
+      const amount = tokenAmounts[symbol];
+      if (amount.gt(new BigNumber(0))) {
+        const token = await contract.basket.getToken(symbol);
+        request[token.contract.address] = amount;
+      }
+    }
+    return request;
+  };
+
+  const estimateGas = async () => {
+    if (proportion) {
+      return contract.hToken.estimateRedeemProportionally(amount, wallet.account).then(v => {
+        return setEstimatedGas(v);
+      });
+    } else {
+      return generateRequest().then(r => {
+        return contract.hToken.estimateRedeemManually(r, wallet.account).then(v => {
+          return setEstimatedGas(v);
+        });
+      });
+    }
+  };
+
   const onRedeem = async () => {
     if (amount.lte(new BigNumber(0))) {
       // TODO: handle exception
@@ -114,17 +148,10 @@ export const Redeem: React.FC = () => {
     setRequesting(true);
     try {
       if (proportion) {
-        await contract.hToken.redeemProportionally(amount);
+        await contract.hToken.redeemProportionally(amount, wallet.account);
       } else {
-        const request: Record<string, BigNumber> = {};
-        for (const address of Object.keys(tokenAmounts)) {
-          const amount = tokenAmounts[address];
-          if (amount.gt(new BigNumber(0))) {
-            const token = await contract.basket.getToken(address);
-            request[address] = amount.shiftedBy(token.decimals);
-          }
-        }
-        await contract.hToken.redeemManually(request);
+        const request: Record<string, BigNumber> = await generateRequest();
+        await contract.hToken.redeemManually(request, wallet.account);
       }
     } catch (ex) {
       // TODO: handle exception
@@ -141,7 +168,10 @@ export const Redeem: React.FC = () => {
       </div>
       <div className={classes.inputForm}>
         {proportion ?
-          <ERC20TokenInput value={amount} onValueChanged={setAmount} contract={contract.hToken}/> :
+          <ERC20TokenInput value={amount} onValueChanged={(v, a) => {
+            setAmount(v);
+            setRequesting(!a);
+          }} contract={contract.hToken} spender={contract.hToken.address}/> :
           <ERC20TokenUsed contract={contract.hToken} value={amount}/>}
         <p className={classes.proportion}>
           <Checkbox label={'Redeem with all assets proportionally'} initialValue={proportion}
@@ -159,8 +189,8 @@ export const Redeem: React.FC = () => {
         }
       </div>
       <div className={classes.action}>
-        <p><Button label={'REDEEM hUSD'} disabled={!requesting} onClick={onRedeem}/></p>
-        <p>Estimated Gas Fee: 0.01 ETH ($20 USD)</p>
+        <p><Button label={'REDEEM hUSD'} disabled={requesting} onClick={onRedeem}/></p>
+        <p>Estimated Gas Fee: {Numbers.format(estimatedGas, {decimals: 8})} ETH</p>
       </div>
       <div className={classes.poolShare}>
         <BasketShares/>

@@ -1,9 +1,10 @@
 import BigNumber from 'bignumber.js';
-import React from 'react';
+import React, {useEffect} from 'react';
 import {createUseStyles} from 'react-jss';
+import {Numbers} from '../../common';
 import {HonestTheme} from '../../common/theme';
 import {Button, ERC20TokenInput} from '../../components';
-import {useContract, useSaving} from '../../context';
+import {useContract, useWallet} from '../../context';
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
   root: {},
@@ -38,10 +39,24 @@ export const WithdrawForm: React.FC = () => {
 
   const classes = useStyles();
   const contract = useContract();
-  const saving = useSaving();
+  const wallet = useWallet();
 
   const [requesting, setRequesting] = React.useState<boolean>(false);
   const [amount, setAmount] = React.useState<BigNumber>(new BigNumber(0));
+  const [balance, setBalance] = React.useState<BigNumber>(new BigNumber(0));
+  const [estimatedGas, setEstimatedGas] = React.useState<BigNumber>(new BigNumber(0));
+
+  useEffect(() => {
+    contract.saving.savingsOf(wallet.account).then(a => {
+      setBalance(a);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (amount.gt(new BigNumber(0)) && !requesting) {
+      estimateGas();
+    }
+  }, [amount, requesting]);
 
   const onWithdraw = async () => {
     if (amount.lte(new BigNumber(0))) {
@@ -51,13 +66,27 @@ export const WithdrawForm: React.FC = () => {
     }
     setRequesting(true);
     try {
-      const decimals = await contract.hToken.getDecimals();
-      await contract.saving.withdrawRaw(amount.shiftedBy(decimals));
+      const request = await generateRequest();
+      await contract.saving.withdrawRaw(request);
     } catch (ex) {
       // TODO: handle exception
       console.error(ex);
     }
     setRequesting(false);
+  };
+
+  const generateRequest = async () => {
+    const decimals = await contract.hToken.getDecimals();
+    return amount.shiftedBy(decimals);
+  };
+
+  const estimateGas = async () => {
+    return generateRequest().then(v => {
+      return contract.saving.estimateWithdrawGas(v).then(v => {
+        console.log(v);
+        return setEstimatedGas(v);
+      });
+    });
   };
 
   return (
@@ -67,11 +96,14 @@ export const WithdrawForm: React.FC = () => {
         <p className={classes.subTitle}>Withdraw hUSD into your wallet.</p>
       </div>
       <div className={classes.form}>
-        <ERC20TokenInput contract={contract.hToken} value={amount} balance={saving.balance} onValueChanged={(v) => setAmount(v)}/>
+        <ERC20TokenInput contract={contract.hToken} value={amount} balance={balance} onValueChanged={(v, a) => {
+          setAmount(v);
+          setRequesting(!a);
+        }}/>
       </div>
       <div className={classes.action}>
         <p><Button label={'Withdraw hUSD'} disabled={requesting} onClick={onWithdraw}/></p>
-        <p>Estimated Gas Fee: 0.01 ETH ($20 USD)</p>
+        <p>Estimated Gas Fee: {Numbers.format(estimatedGas, {decimals: 8})} ETH</p>
       </div>
     </div>
   );

@@ -1,10 +1,11 @@
 import BigNumber from 'bignumber.js';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {createUseStyles} from 'react-jss';
+import {Numbers} from '../../common';
 import {HonestTheme} from '../../common/theme';
 import {BasketShares, BasketTokenSelect, ERC20TokenInput, ERC20TokenReceived} from '../../components';
 import {Button} from '../../components/button';
-import {useContract} from '../../context';
+import {useContract, useWallet} from '../../context';
 import {BasketToken} from '../../contract';
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
@@ -81,15 +82,54 @@ export const Swap: React.FC = () => {
 
   const classes = useStyles();
   const contract = useContract();
+  const wallet = useWallet();
 
   const [requesting, setRequesting] = React.useState<boolean>(false);
   const [tokenFrom, setTokenFrom] = useState<BasketToken>();
   const [tokenTo, setTokenTo] = useState<BasketToken>();
   const [amount, setAmount] = React.useState<BigNumber>(new BigNumber(0));
+  const [balance, setBalance] = React.useState<BigNumber>(new BigNumber(0));
+  const [estimatedGas, setEstimatedGas] = React.useState<BigNumber>(new BigNumber(0));
 
   React.useEffect(() => {
     setAmount(new BigNumber(0));
+    getBalance();
   }, [tokenFrom, tokenTo]);
+
+  useEffect(() => {
+    if (amount.gt(new BigNumber(0)) && !requesting) {
+      estimateGas();
+    }
+  }, [amount, requesting]);
+
+  const getBalance = async () => {
+    if (tokenFrom && tokenTo) {
+      const balance = await tokenFrom.contract.getBalance(wallet.account);
+      console.log(balance.toString());
+      const maxBalance = await contract.basket.getTokenBalance(tokenTo.symbol);
+      console.log(maxBalance.toString());
+      setBalance(balance.lte(maxBalance) ? balance : maxBalance);
+    }
+  };
+
+  const generateRequest = async () => {
+    if (tokenFrom && tokenTo) {
+      const decimals = tokenFrom.decimals;
+      return {from: tokenFrom.contract.address, to: tokenTo.contract.address, amount: amount.shiftedBy(decimals), account: wallet.account};
+    }
+    return undefined;
+  };
+
+  const estimateGas = async () => {
+    return generateRequest().then(v => {
+      if (v === undefined) {
+        return undefined;
+      }
+      return contract.basket.estimateSwapGas(v.from, v.to, v.amount, v.account).then(v => {
+        return setEstimatedGas(v);
+      });
+    });
+  };
 
   const onSwap = async () => {
     if (amount.lte(new BigNumber(0))) {
@@ -119,7 +159,10 @@ export const Swap: React.FC = () => {
       <div className={classes.from}>
         <BasketTokenSelect className={classes.fromSelect} value={0} excludes={tokenTo ? [tokenTo] : []}
                            onTokenSelected={setTokenFrom}/>
-        {tokenFrom && <ERC20TokenInput value={amount} onValueChanged={setAmount} contract={tokenFrom.contract}/>}
+        {tokenFrom && <ERC20TokenInput value={amount} onValueChanged={(v, a) => {
+          setAmount(v);
+          setRequesting(!a);
+        }} spender={contract.basket.address} contract={tokenFrom.contract} balance={balance}/>}
       </div>
       <div className={classes.arrow}><img src={'/assets/icon/arrow-down.svg'} alt={'to'}/></div>
       <div className={classes.to}>
@@ -130,7 +173,7 @@ export const Swap: React.FC = () => {
       <div className={classes.fee}>Swap Fee: 0.1%</div>
       <div className={classes.action}>
         <p><Button label={'SWAP'} disabled={requesting} onClick={onSwap}/></p>
-        <p>Estimated Gas Fee: 0.01 ETH ($20 USD)</p>
+        <p>Estimated Gas Fee: {Numbers.format(estimatedGas, {decimals: 8})} ETH</p>
       </div>
       <div className={classes.poolShare}>
         <BasketShares/>
