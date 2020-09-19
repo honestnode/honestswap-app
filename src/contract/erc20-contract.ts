@@ -289,4 +289,15 @@ export class ERC20Contract extends EthereumContract {
     const result: Promise<ethers.BigNumber> = this._handler.balanceOf(address);
     return result.then(n => new BigNumber(n.toString()).shiftedBy(-decimals));
   }
+
+  public async approve(spender: string, amount: BigNumber): Promise<boolean> {
+    const decimals = await this.getDecimals();
+    return this._handler.approve(spender, ethers.BigNumber.from(amount.shiftedBy(decimals).toString()));
+  }
+
+  public async allowanceOf(owner: string, spender: string): Promise<BigNumber> {
+    const decimals = await this.getDecimals();
+    const result: Promise<ethers.BigNumber> = this._handler.allowance(owner, spender);
+    return result.then(n => new BigNumber(n.toString()).shiftedBy(-decimals));
+  }
 }

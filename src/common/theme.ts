@@ -15,11 +15,14 @@ export interface HonestPalette {
   textLighter: string;
   textWhite: string;
   token: (name: string) => string;
+  warning: string;
+  error: string;
 }
 
 export interface HonestTypography {
   fontFamily: string;
   fontSize: number;
+  buttonFontSize: number;
 }
 
 export const theme: HonestTheme = {
@@ -34,6 +37,8 @@ export const theme: HonestTheme = {
     text: '#909090',
     textLighter: '#b0b0b0',
     textWhite: '#f0f0f0',
+    warning: '#ff9966',
+    error: '#cc3300',
     token: name => {
       const themed: Record<string, string> = {
         husd: '#f0f0f0',
@@ -47,6 +52,7 @@ export const theme: HonestTheme = {
   },
   typography: {
     fontFamily: 'Verdana,Helvetica,sans-serif,serif',
-    fontSize: 16
+    fontSize: 16,
+    buttonFontSize: 14
   }
 };

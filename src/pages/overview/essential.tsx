@@ -29,14 +29,15 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
 export const Essential: React.FC = () => {
 
 
-  const {apy} = {apy: new BigNumber(0.222322)};
   const classes = useStyles();
+  const [apy, setApy] = useState<BigNumber>(new BigNumber(0));
   const [supply, setSupply] = useState<BigNumber>(new BigNumber(0));
 
   const contract = useContract();
 
   useEffect(() => {
     contract.hToken.getTotalSupply().then(setSupply);
+    contract.saving.getApy().then(setApy);
     // contract.hToken.collectInterest();
   }, [contract]);
 

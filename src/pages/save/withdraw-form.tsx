@@ -40,10 +40,25 @@ export const WithdrawForm: React.FC = () => {
   const contract = useContract();
   const saving = useSaving();
 
+  const [requesting, setRequesting] = React.useState<boolean>(false);
   const [amount, setAmount] = React.useState<BigNumber>(new BigNumber(0));
 
-
-  const onWithdraw = () => {};
+  const onWithdraw = async () => {
+    if (amount.lte(new BigNumber(0))) {
+      // TODO: handle exception
+      console.error('Amount should be greater than 0');
+      return;
+    }
+    setRequesting(true);
+    try {
+      const decimals = await contract.hToken.getDecimals();
+      await contract.saving.withdrawRaw(amount.shiftedBy(decimals));
+    } catch (ex) {
+      // TODO: handle exception
+      console.error(ex);
+    }
+    setRequesting(false);
+  };
 
   return (
     <div className={classes.root}>
@@ -55,7 +70,7 @@ export const WithdrawForm: React.FC = () => {
         <ERC20TokenInput contract={contract.hToken} value={amount} balance={saving.balance} onValueChanged={(v) => setAmount(v)}/>
       </div>
       <div className={classes.action}>
-        <p><Button label={'Withdraw hUSD'} onClick={onWithdraw}/></p>
+        <p><Button label={'Withdraw hUSD'} disabled={requesting} onClick={onWithdraw}/></p>
         <p>Estimated Gas Fee: 0.01 ETH ($20 USD)</p>
       </div>
     </div>

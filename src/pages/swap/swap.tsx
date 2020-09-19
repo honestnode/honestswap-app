@@ -4,7 +4,8 @@ import {createUseStyles} from 'react-jss';
 import {HonestTheme} from '../../common/theme';
 import {BasketShares, BasketTokenSelect, ERC20TokenInput, ERC20TokenReceived} from '../../components';
 import {Button} from '../../components/button';
-import {BasketTokenBalance} from '../../contract';
+import {useContract} from '../../context';
+import {BasketToken} from '../../contract';
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
   root: {
@@ -79,14 +80,35 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
 export const Swap: React.FC = () => {
 
   const classes = useStyles();
+  const contract = useContract();
 
-  const [tokenFrom, setTokenFrom] = useState<BasketTokenBalance>();
-  const [tokenTo, setTokenTo] = useState<BasketTokenBalance>();
+  const [requesting, setRequesting] = React.useState<boolean>(false);
+  const [tokenFrom, setTokenFrom] = useState<BasketToken>();
+  const [tokenTo, setTokenTo] = useState<BasketToken>();
   const [amount, setAmount] = React.useState<BigNumber>(new BigNumber(0));
 
   React.useEffect(() => {
     setAmount(new BigNumber(0));
   }, [tokenFrom, tokenTo]);
+
+  const onSwap = async () => {
+    if (amount.lte(new BigNumber(0))) {
+      // TODO: handle exception
+      console.error('Amount should be greater than 0');
+      return;
+    }
+    setRequesting(true);
+    if (tokenFrom !== undefined && tokenTo !== undefined) {
+      try {
+        const decimals = await tokenFrom.contract.getDecimals();
+        await contract.swap.swap(tokenFrom.contract.address, tokenTo.contract.address, amount.shiftedBy(decimals));
+      } catch (ex) {
+        // TODO: handle exception
+        console.error(ex);
+      }
+    }
+    setRequesting(false);
+  };
 
   return (
     <div className={classes.root}>
@@ -107,7 +129,7 @@ export const Swap: React.FC = () => {
       </div>
       <div className={classes.fee}>Swap Fee: 0.1%</div>
       <div className={classes.action}>
-        <p><Button label={'SWAP'} onClick={() => {}}/></p>
+        <p><Button label={'SWAP'} disabled={requesting} onClick={onSwap}/></p>
         <p>Estimated Gas Fee: 0.01 ETH ($20 USD)</p>
       </div>
       <div className={classes.poolShare}>

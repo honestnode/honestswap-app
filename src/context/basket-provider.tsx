@@ -6,7 +6,6 @@ import {useContract} from './index';
 export interface BasketContext {
   contract: BasketContract;
   tokens: Record<string, BasketToken>;
-  // tokenBalances: Record<string, BasketTokenBalance>;
 }
 
 const basketContext = createContext<BasketContext>({} as never);
@@ -21,7 +20,6 @@ export const BasketProvider: FC = ({children}) => {
       setContext({
         contract: contract.basket,
         tokens: tokens,
-        // tokenBalances: balances
       });
     });
   }, [contract]);

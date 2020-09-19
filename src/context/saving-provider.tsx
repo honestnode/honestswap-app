@@ -18,7 +18,7 @@ export const SavingProvider : FC = ({children}) => {
   const contract = useContract();
 
   useEffect(() => {
-    contract.saving.getRawCreditBalances(wallet.account).then(balance => {
+    contract.saving.getRawBalance().then(balance => {
       contract.hToken.getDecimals().then(decimals => setContext({
         ...context,
         balance: balance.shiftedBy(-decimals)

@@ -1,9 +1,9 @@
 import BigNumber from 'bignumber.js';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {createUseStyles} from 'react-jss';
 import {Numbers} from '../../common';
 import {HonestTheme} from '../../common/theme';
-import {useSaving} from '../../context';
+import {useContract, useSaving, useWallet} from '../../context';
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
   root: {
@@ -54,13 +54,26 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
 }));
 
 export const Essential: React.FC = () => {
-  const {weight, apy, share} = {
-    weight: new BigNumber(1400),
-    apy: new BigNumber(0.222322),
-    share: new BigNumber(0.0012)
-  };
   const classes = useStyles();
+  const contract = useContract();
+  const wallet = useWallet();
   const saving = useSaving();
+
+  const [weight, setWeight] = useState<BigNumber>(new BigNumber(0));
+  const [apy, setApy] = useState<BigNumber>(new BigNumber(0));
+  const [share, setShare] = useState<BigNumber>(new BigNumber(0));
+
+  useEffect(() => {
+    contract.saving.getApy().then(setApy);
+    let weight: BigNumber = new BigNumber(0), totalWeight: BigNumber = new BigNumber(1);
+    Promise.all([
+      contract.weight.getWeight(wallet.account).then(w => weight = w),
+      contract.weight.getTotalWeight().then(tw => totalWeight = tw)
+    ]).then(() => {
+      setWeight(weight);
+      setShare(weight.dividedBy(totalWeight));
+    });
+  }, [wallet, contract]);
 
   return (
     <div className={classes.root}>

@@ -91,27 +91,78 @@ export const Mint: React.FC = () => {
   const contract = useContract();
   const wallet = useWallet();
 
-  const [values, setValues] = React.useState<Record<string, BigNumber>>({});
+  const [mintable, setMintable] = React.useState<boolean>(false);
+  const [values, setValues] = React.useState<Record<string, {amount: BigNumber, available: boolean}>>({});
   const [amount, setAmount] = React.useState<BigNumber>(new BigNumber(0));
   const [balance, setBalance] = React.useState<BigNumber>(new BigNumber(0));
+  const [estimatedGas, setEstimatedGas] = React.useState<BigNumber>(new BigNumber(0));
 
   React.useEffect(() => {
     contract.hToken.getBalance(wallet.account).then(setBalance);
   }, [contract, wallet]);
 
-  const onValuesChanged = (values: Record<string, BigNumber>) => {
-    setValues(values);
+  React.useEffect(() => {
+    let mintable;
+    if (Object.entries(values).length === 0) {
+      mintable = false;
+    } else {
+      mintable = Object.values(values).filter((v) => !v.available).length === 0;
+    }
+    setMintable(mintable);
+    if (mintable) {
+      estimateGas();
+    }
+  }, [values]);
+
+  const onValuesChanged = (values: Record<string, {amount: BigNumber, available: boolean}>) => {
     if (Object.keys(values).length === 0) {
       setAmount(new BigNumber(0));
+    } else {
+      setAmount(Object.entries(values).map(([_, v]) => v.amount).reduce((pv, cv) => pv.plus(cv)));
     }
-    setAmount(Object.entries(values).map(([_, v]) => v).reduce((pv, cv) => pv.plus(cv)));
+    setValues(values);
   };
 
-  const onMint = () => {
-    Object.entries(values).forEach(([key, value]) => {
-      console.log(key, value.toString());
+  const estimateGas = () => {
+    generateMintRequest().then(request => {
+      if (Object.entries(request).length > 0) {
+        contract.hToken.estimateMintMulti(request).then(gas => {
+          console.log(gas.toString());
+          setEstimatedGas(gas);
+        });
+      }
     });
-    // contract.hToken.mint();
+  }
+
+  const generateMintRequest = async () : Promise<Record<string, BigNumber>> => {
+    const request: Record<string, BigNumber> = {};
+    for (const symbol of Object.keys(values)) {
+      const amount = values[symbol].amount;
+      if (amount.gt(new BigNumber(0))) {
+        const token = await contract.basket.getToken(symbol);
+        request[token.contract.address] = amount;
+      }
+    }
+    return request;
+  };
+
+  const onMint = async () => {
+    // if (amount.lte(new BigNumber(0))) {
+      // TODO: handle exception
+      // console.error('Amount should be greater than 0');
+      // return;
+    // }
+    setMintable(false);
+    try {
+      const request: Record<string, BigNumber> = await generateMintRequest();
+      //await contract.hToken.mintMulti(request);
+      const gas = await contract.hToken.mintMulti(request);
+      console.log(gas.toString());
+    } catch (ex) {
+      // TODO: handle exception
+      console.error(ex);
+    }
+    setMintable(true);
   };
 
   return (
@@ -121,7 +172,7 @@ export const Mint: React.FC = () => {
         <p className={classes.subTitle}>Deposit stablecoins, get hUSD at 1:1 ratio.</p>
       </div>
       <div className={classes.poolInput}>
-        <BasketInput onValuesChanged={onValuesChanged}/>
+        <BasketInput spender={contract.hToken.address} onValuesChanged={onValuesChanged}/>
       </div>
       <div className={classes.to}><img src={'/assets/icon/arrow-down.svg'} alt={'to'}/></div>
       <div className={classes.received}>
@@ -136,8 +187,9 @@ export const Mint: React.FC = () => {
           className={classes.summaryUnit}>hUSD</span></p>
       </div>
       <div className={classes.action}>
-        <p><Button label={'MINT hUSD'} onClick={onMint}/></p>
-        <p>Estimated Gas Fee: 0.01 ETH ($20 USD)</p>
+
+        <p><Button label={'MINT hUSD'} disabled={!mintable} onClick={onMint}/></p>
+        <p>Estimated Gas Fee: {Numbers.format(estimatedGas, {decimals: 8})} ETH</p>
       </div>
       <div className={classes.poolShare}>
         <BasketShares/>

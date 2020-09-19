@@ -39,9 +39,25 @@ export const SaveForm: React.FC = () => {
   const classes = useStyles();
   const contract = useContract();
 
+  const [requesting, setRequesting] = React.useState<boolean>(false);
   const [amount, setAmount] = React.useState<BigNumber>(new BigNumber(0));
 
-  const onDeposit = () => {};
+  const onDeposit = async () => {
+    if (amount.lte(new BigNumber(0))) {
+      // TODO: handle exception
+      console.error('Amount should be greater than 0');
+      return;
+    }
+    setRequesting(true);
+    try {
+      const decimals = await contract.hToken.getDecimals();
+      await contract.saving.depositRaw(amount.shiftedBy(decimals));
+    } catch (ex) {
+      // TODO: handle exception
+      console.error(ex);
+    }
+    setRequesting(false);
+  };
 
   return (
     <div className={classes.root}>
@@ -53,7 +69,7 @@ export const SaveForm: React.FC = () => {
         <ERC20TokenInput contract={contract.hToken} value={amount} onValueChanged={(v) => setAmount(v)}/>
       </div>
       <div className={classes.action}>
-        <p><Button label={'Deposit hUSD'} onClick={onDeposit}/></p>
+        <p><Button label={'Deposit hUSD'} disabled={requesting} onClick={onDeposit}/></p>
         <p>Estimated Gas Fee: 0.01 ETH ($20 USD)</p>
       </div>
     </div>

@@ -16,12 +16,19 @@ const useStyles = createUseStyles<HonestTheme>(theme => ({
     padding: `${theme.spacing(2)}px ${theme.spacing(3)}px`,
     cursor: 'pointer',
     borderRadius: '8px',
+    fontSize: theme.typography.buttonFontSize,
     '&:hover': {
-      background: theme.palette.buttonPrimaryDarker
+      background: theme.palette.buttonPrimaryDarker,
+      color: theme.palette.textWhite,
     },
     '&:focus': {
       outline: 0
-    }
+    },
+    '&:disabled, &:disabled:hover': {
+      background: theme.palette.buttonDisabled,
+      color: theme.palette.textLighter,
+      cursor: 'not-allowed'
+    },
   }
 }));
 

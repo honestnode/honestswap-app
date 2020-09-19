@@ -84,6 +84,7 @@ export const Redeem: React.FC = () => {
   const contract = useContract();
   const wallet = useWallet();
 
+  const [requesting, setRequesting] = React.useState<boolean>(false);
   const [balance, setBalance] = React.useState<BigNumber>(new BigNumber(0));
   const [amount, setAmount] = React.useState<BigNumber>(new BigNumber(0));
   const [tokenAmounts, setTokenAmounts] = React.useState<Record<string, BigNumber>>({});
@@ -104,8 +105,32 @@ export const Redeem: React.FC = () => {
     setAmount(Object.entries(amounts).reduce((r, [_, value]) => r.plus(value), new BigNumber(0)));
   };
 
-  const onRedeem = () => {
-    console.log(tokenAmounts);
+  const onRedeem = async () => {
+    if (amount.lte(new BigNumber(0))) {
+      // TODO: handle exception
+      console.error('Amount should be greater than 0');
+      return;
+    }
+    setRequesting(true);
+    try {
+      if (proportion) {
+        await contract.hToken.redeemProportionally(amount);
+      } else {
+        const request: Record<string, BigNumber> = {};
+        for (const address of Object.keys(tokenAmounts)) {
+          const amount = tokenAmounts[address];
+          if (amount.gt(new BigNumber(0))) {
+            const token = await contract.basket.getToken(address);
+            request[address] = amount.shiftedBy(token.decimals);
+          }
+        }
+        await contract.hToken.redeemManually(request);
+      }
+    } catch (ex) {
+      // TODO: handle exception
+      console.error(ex);
+    }
+    setRequesting(false);
   };
 
   return (
@@ -134,7 +159,7 @@ export const Redeem: React.FC = () => {
         }
       </div>
       <div className={classes.action}>
-        <p><Button label={'REDEEM hUSD'} onClick={onRedeem}/></p>
+        <p><Button label={'REDEEM hUSD'} disabled={!requesting} onClick={onRedeem}/></p>
         <p>Estimated Gas Fee: 0.01 ETH ($20 USD)</p>
       </div>
       <div className={classes.poolShare}>
