@@ -702,30 +702,9 @@ const abi = [
   }
 ];
 
-export class HTokenContract extends ERC20Contract {
+export class HonestTokenContract extends ERC20Contract {
   constructor(address: string, provider: EthereumContractProvider) {
     super(address, provider, abi);
-  }
-
-  public async estimateMintMultiTo(amounts: Record<string, BigNumber>, account: string) : Promise<BigNumber> {
-    const price = await this._provider.getGasPrice();
-    const result: Promise<ethers.BigNumber> = this._handler.estimateGas.mintMultiTo(
-      Object.keys(amounts), Object.values(amounts).map(a => ethers.BigNumber.from(a.toString())), account);
-    return result.then(a => new BigNumber(a.mul(price).toString()).shiftedBy(-18));
-  }
-
-  public async mintTo(token: string, amount: BigNumber): Promise<BigNumber> {
-    const decimals = await this.getDecimals();
-    const finalAmount = amount.shiftedBy(decimals);
-    const result: Promise<ethers.BigNumber> = this._handler.mint(token, ethers.BigNumber.from(finalAmount.toString()));
-    return result.then(a => new BigNumber(a.toString()).shiftedBy(-decimals));
-  }
-
-  public async mintMultiTo(amounts: Record<string, BigNumber>, account: string): Promise<BigNumber> {
-    const decimals = await this.getDecimals();
-    const result: Promise<ethers.BigNumber> = this._handler.mintMultiTo(
-      Object.keys(amounts), Object.values(amounts).map(a => ethers.BigNumber.from(a.toString())), account);
-    return result.then(a => new BigNumber(a.toString()).shiftedBy(-decimals));
   }
 
   public async estimateRedeemProportionally(amount: BigNumber, account: string) : Promise<BigNumber> {
@@ -752,5 +731,9 @@ export class HTokenContract extends ERC20Contract {
     const decimals = await this.getDecimals();
     return this._handler.redeemMultiTo(
       Object.keys(amounts), Object.values(amounts).map(a => ethers.BigNumber.from(a.shiftedBy(decimals).toString())), account);
+  }
+
+  public swap(fromToken: string, toToken: string, amount: BigNumber) : Promise<any[]> {
+    return this._handler.swap(fromToken, toToken, ethers.BigNumber.from(amount.toString()));
   }
 }

@@ -48,7 +48,7 @@ export const SaveForm: React.FC = () => {
     if (amount.gt(new BigNumber(0)) && !requesting) {
       estimateGas();
     }
-  }, [amount]);
+  }, [amount, requesting]);
 
   const onDeposit = async () => {
     if (amount.lte(new BigNumber(0))) {
@@ -59,7 +59,7 @@ export const SaveForm: React.FC = () => {
     setRequesting(true);
     try {
       const request = await generateRequest();
-      await contract.saving.depositRaw(request);
+      await contract.savings.depositRaw(request);
     } catch (ex) {
       // TODO: handle exception
       console.error(ex);
@@ -68,13 +68,13 @@ export const SaveForm: React.FC = () => {
   };
 
   const generateRequest = async () => {
-    const decimals = await contract.hToken.getDecimals();
+    const decimals = await contract.token.getDecimals();
     return amount.shiftedBy(decimals);
   };
 
   const estimateGas = async () => {
     return generateRequest().then(v => {
-      return contract.saving.estimateDepositGas(v).then(v => {
+      return contract.savings.estimateDepositGas(v).then(v => {
         return setEstimatedGas(v);
       });
     });
@@ -87,7 +87,7 @@ export const SaveForm: React.FC = () => {
         <p className={classes.subTitle}>Deposit your hUSD into the hUSD save contract and start earning interest.</p>
       </div>
       <div className={classes.form}>
-        <ERC20TokenInput contract={contract.hToken} value={amount} spender={contract.saving.address} onValueChanged={(v, a) => {
+        <ERC20TokenInput contract={contract.token} value={amount} spender={contract.savings.address} onValueChanged={(v, a) => {
           setAmount(v);
           setRequesting(!a);
         }}/>

@@ -18,7 +18,7 @@ export const SavingProvider : FC = ({children}) => {
   const contract = useContract();
 
   useEffect(() => {
-    contract.saving.getTotalBalance().then(balance => {
+    contract.savings.getTotalBalance().then(balance => {
       setContext({
         ...context,
         balance: balance

@@ -36,8 +36,8 @@ export const Essential: React.FC = () => {
   const contract = useContract();
 
   useEffect(() => {
-    contract.hToken.getTotalSupply().then(setSupply);
-    contract.saving.getApy().then(setApy);
+    contract.token.getTotalSupply().then(setSupply);
+    contract.savings.getApy().then(setApy);
     // contract.hToken.collectInterest();
   }, [contract]);
 

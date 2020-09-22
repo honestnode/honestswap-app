@@ -575,15 +575,11 @@ export class SavingContract extends EthereumContract {
   }
 
   public async estimateDepositGas(amount: BigNumber) : Promise<BigNumber> {
-    const price = await this._provider.getGasPrice();
-    const result: Promise<ethers.BigNumber> = this._handler.estimateGas.deposit(ethers.BigNumber.from(amount.toString()));
-    return result.then(a => new BigNumber(a.mul(price).toString()).shiftedBy(-18));
+    return this.estimateGas('deposit', ethers.BigNumber.from(amount.toString()));
   }
 
   public async estimateWithdrawGas(amount: BigNumber) : Promise<BigNumber> {
-    const price = await this._provider.getGasPrice();
-    const result: Promise<ethers.BigNumber> = this._handler.estimateGas.withdraw(ethers.BigNumber.from(amount.toString()));
-    return result.then(a => new BigNumber(a.mul(price).toString()).shiftedBy(-18));
+    return this.estimateGas('withdraw', ethers.BigNumber.from(ethers.BigNumber.from(amount.toString())));
   }
 
   public async depositRaw(amount: BigNumber): Promise<BigNumber> {

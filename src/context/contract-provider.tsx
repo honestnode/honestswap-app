@@ -1,21 +1,28 @@
 import React, {createContext, FC, useContext, useMemo} from 'react';
-import {BasketContract, HTokenContract, SavingContract, SwapContract} from '../contract';
+import {
+  VaultContract,
+  HonestTokenContract,
+  SavingContract,
+  HonestTokenManagerContract,
+  ERC20Contract, HonestBonusContract, HonestFeeContract
+} from '../contract';
 import {useEthereum} from './ethereum-provider';
 import {useWallet} from './wallet-provider';
 
-// const basketAddress = '0x7AE685713D0dcccccE3D936D3E0FA382639839Df';
-const basketAddress = '0x40F40E4A95bB031f2C888B3eb3a111D2D42AB1D9';
-// const hAssetAddress = '0x24a8cfe26871f83cb39adca1028caed97d6a7ed3';
-const hAssetAddress = '0x3592807834Ad53fe2c0925Ea1a25d9d275C370D2';
-
-const savingAddress = '0x584c250D1AF1a655E1556400968c9C3Aef5F25d8';
-const swapAddress = '0x6423F97552018FDDf7Bf20bE6D016d9De65Af46F';
+const hAssetAddress = '0x8DBBb2b8bD8820209614d89957d710F0B93016c8';
+const hAssetManagerAddress = '0xB6e42332f2384ca71368026B95723AA9C46C66Ad';
+const vaultAddress = '0x573C27e7751503Cf0C98aC62F7e05832e7f4bb8F';
+const savingsAddress = '0xF9122714A405aba4B07E82CDC3a4c763A36DcF9b';
+const bonusAddress = '0x829a05D84de1bECB5Ba97f354b4cF16a0BCFfAb2';
+const feeAddress = '0xD8F7FA7416d49732A62C726FcA67969aD899C5F6';
 
 export interface ContractContext {
-  hToken: HTokenContract;
-  basket: BasketContract;
-  saving: SavingContract;
-  swap: SwapContract;
+  token: ERC20Contract;
+  manager: HonestTokenManagerContract;
+  vault: VaultContract;
+  savings: SavingContract;
+  bonus: HonestBonusContract;
+  fee: HonestFeeContract;
 }
 
 const contractContext = createContext<ContractContext>({} as never);
@@ -26,10 +33,12 @@ export const ContractProvider: FC = ({children}) => {
   const wallet = useWallet();
   const context = useMemo<ContractContext>(() => {
     return {
-      hToken: new HTokenContract(hAssetAddress, ethereum.provider),
-      basket: new BasketContract(basketAddress, ethereum.provider),
-      saving: new SavingContract(savingAddress, ethereum.provider),
-      swap: new SwapContract(swapAddress, ethereum.provider)
+      token: new HonestTokenContract(hAssetAddress, ethereum.provider),
+      manager: new HonestTokenManagerContract(hAssetManagerAddress, ethereum.provider),
+      vault: new VaultContract(vaultAddress, ethereum.provider),
+      savings: new SavingContract(savingsAddress, ethereum.provider),
+      bonus: new HonestBonusContract(bonusAddress, ethereum.provider),
+      fee: new HonestFeeContract(feeAddress, ethereum.provider)
     };
   }, [ethereum, wallet]);
 

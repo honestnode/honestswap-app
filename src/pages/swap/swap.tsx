@@ -105,9 +105,7 @@ export const Swap: React.FC = () => {
   const getBalance = async () => {
     if (tokenFrom && tokenTo) {
       const balance = await tokenFrom.contract.getBalance(wallet.account);
-      console.log(balance.toString());
-      const maxBalance = await contract.basket.getTokenBalance(tokenTo.symbol);
-      console.log(maxBalance.toString());
+      const maxBalance = await contract.vault.getTokenBalance(tokenTo.symbol);
       setBalance(balance.lte(maxBalance) ? balance : maxBalance);
     }
   };
@@ -125,7 +123,7 @@ export const Swap: React.FC = () => {
       if (v === undefined) {
         return undefined;
       }
-      return contract.basket.estimateSwapGas(v.from, v.to, v.amount, v.account).then(v => {
+      return contract.manager.estimateSwapGas(v.from, v.to, v.amount).then(v => {
         return setEstimatedGas(v);
       });
     });
@@ -138,14 +136,14 @@ export const Swap: React.FC = () => {
       return;
     }
     setRequesting(true);
-    if (tokenFrom !== undefined && tokenTo !== undefined) {
-      try {
-        const decimals = await tokenFrom.contract.getDecimals();
-        await contract.swap.swap(tokenFrom.contract.address, tokenTo.contract.address, amount.shiftedBy(decimals));
-      } catch (ex) {
-        // TODO: handle exception
-        console.error(ex);
+    try {
+      const request = await generateRequest();
+      if (request !== undefined) {
+        await contract.manager.swap(request.from, request.to, request.amount);
       }
+    } catch (ex) {
+      // TODO: handle exception
+      console.error(ex);
     }
     setRequesting(false);
   };
@@ -162,7 +160,7 @@ export const Swap: React.FC = () => {
         {tokenFrom && <ERC20TokenInput value={amount} onValueChanged={(v, a) => {
           setAmount(v);
           setRequesting(!a);
-        }} spender={contract.basket.address} contract={tokenFrom.contract} balance={balance}/>}
+        }} spender={contract.manager.address} contract={tokenFrom.contract} balance={balance}/>}
       </div>
       <div className={classes.arrow}><img src={'/assets/icon/arrow-down.svg'} alt={'to'}/></div>
       <div className={classes.to}>

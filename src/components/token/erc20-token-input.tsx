@@ -130,7 +130,7 @@ export const ERC20TokenInput: FC<ERC20TokenInputProps> = props => {
         onValueChanged(value, true);
       }
     }, 500);
-  }, [value]);
+  }, [value, wallet]);
 
   const onInputChanged = (e: ChangeEvent<HTMLInputElement>) => {
     if (!token?.balance) {

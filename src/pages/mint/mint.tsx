@@ -98,7 +98,7 @@ export const Mint: React.FC = () => {
   const [estimatedGas, setEstimatedGas] = React.useState<BigNumber>(new BigNumber(0));
 
   React.useEffect(() => {
-    contract.hToken.getBalance(wallet.account).then(setBalance);
+    contract.token.getBalance(wallet.account).then(setBalance);
   }, [contract, wallet]);
 
   React.useEffect(() => {
@@ -126,7 +126,7 @@ export const Mint: React.FC = () => {
   const estimateGas = () => {
     generateMintRequest().then(request => {
       if (Object.entries(request).length > 0) {
-        contract.hToken.estimateMintMultiTo(request, wallet.account).then(gas => {
+        contract.manager.estimateMintGas(request).then(gas => {
           setEstimatedGas(gas);
         });
       }
@@ -138,7 +138,7 @@ export const Mint: React.FC = () => {
     for (const symbol of Object.keys(values)) {
       const amount = values[symbol].amount;
       if (amount.gt(new BigNumber(0))) {
-        const token = await contract.basket.getToken(symbol);
+        const token = await contract.vault.getToken(symbol);
         request[token.contract.address] = amount.shiftedBy(token.decimals);
       }
     }
@@ -155,7 +155,7 @@ export const Mint: React.FC = () => {
     try {
       const request: Record<string, BigNumber> = await generateMintRequest();
       //await contract.hToken.mintMulti(request);
-      await contract.hToken.mintMultiTo(request, wallet.account);
+      await contract.manager.mint(request);
 
     } catch (ex) {
       // TODO: handle exception
@@ -171,11 +171,11 @@ export const Mint: React.FC = () => {
         <p className={classes.subTitle}>Deposit stablecoins, get hUSD at 1:1 ratio.</p>
       </div>
       <div className={classes.poolInput}>
-        <BasketInput spender={contract.hToken.address} onValuesChanged={onValuesChanged}/>
+        <BasketInput spender={contract.manager.address} onValuesChanged={onValuesChanged}/>
       </div>
       <div className={classes.to}><img src={'/assets/icon/arrow-down.svg'} alt={'to'}/></div>
       <div className={classes.received}>
-        <ERC20TokenReceived amount={amount} contract={contract.hToken}/>
+        <ERC20TokenReceived amount={amount} contract={contract.token}/>
       </div>
       <div className={classes.summary}>
         <p><span className={classes.summaryLeading}>Current balance</span><span

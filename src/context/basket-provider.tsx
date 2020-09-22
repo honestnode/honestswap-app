@@ -1,10 +1,10 @@
 import React, {createContext, FC, useContext, useEffect, useState} from 'react';
-import {BasketContract, BasketToken} from '../contract';
+import {VaultContract, BasketToken} from '../contract';
 import {Loading} from '../pages/stage';
 import {useContract} from './index';
 
 export interface BasketContext {
-  contract: BasketContract;
+  contract: VaultContract;
   tokens: Record<string, BasketToken>;
 }
 
@@ -16,9 +16,9 @@ export const BasketProvider: FC = ({children}) => {
   const contract = useContract();
 
   useEffect(() => {
-    contract.basket.getTokens().then(tokens => {
+    contract.vault.getTokens().then(tokens => {
       setContext({
-        contract: contract.basket,
+        contract: contract.vault,
         tokens: tokens,
       });
     });

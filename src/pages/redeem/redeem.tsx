@@ -93,14 +93,14 @@ export const Redeem: React.FC = () => {
   const [estimatedGas, setEstimatedGas] = React.useState<BigNumber>(new BigNumber(0));
 
   React.useEffect(() => {
-    contract.hToken.getBalance(wallet.account).then(setBalance);
+    contract.token.getBalance(wallet.account).then(setBalance);
   }, [contract, wallet]);
 
   useEffect(() => {
-    if (amount.gt(new BigNumber(0))) {
+    if (amount.gt(new BigNumber(0)) && !requesting) {
       estimateGas();
     }
-  }, [amount]);
+  }, [amount, requesting]);
 
   const onProportionChanged = (value: boolean): void => {
     setProportion(value);
@@ -118,8 +118,8 @@ export const Redeem: React.FC = () => {
     for (const symbol of Object.keys(tokenAmounts)) {
       const amount = tokenAmounts[symbol];
       if (amount.gt(new BigNumber(0))) {
-        const token = await contract.basket.getToken(symbol);
-        request[token.contract.address] = amount;
+        const token = await contract.vault.getToken(symbol);
+        request[token.contract.address] = amount.shiftedBy(token.decimals);
       }
     }
     return request;
@@ -127,12 +127,12 @@ export const Redeem: React.FC = () => {
 
   const estimateGas = async () => {
     if (proportion) {
-      return contract.hToken.estimateRedeemProportionally(amount, wallet.account).then(v => {
+      return contract.manager.estimateRedeemProportionallyGas(amount.shiftedBy(18)).then(v => {
         return setEstimatedGas(v);
       });
     } else {
       return generateRequest().then(r => {
-        return contract.hToken.estimateRedeemManually(r, wallet.account).then(v => {
+        return contract.manager.estimateRedeemManuallyGas(r).then(v => {
           return setEstimatedGas(v);
         });
       });
@@ -148,10 +148,10 @@ export const Redeem: React.FC = () => {
     setRequesting(true);
     try {
       if (proportion) {
-        await contract.hToken.redeemProportionally(amount, wallet.account);
+        await contract.manager.redeemProportionally(amount.shiftedBy(18));
       } else {
         const request: Record<string, BigNumber> = await generateRequest();
-        await contract.hToken.redeemManually(request, wallet.account);
+        await contract.manager.redeemManually(request);
       }
     } catch (ex) {
       // TODO: handle exception
@@ -171,8 +171,8 @@ export const Redeem: React.FC = () => {
           <ERC20TokenInput value={amount} onValueChanged={(v, a) => {
             setAmount(v);
             setRequesting(!a);
-          }} contract={contract.hToken} spender={contract.hToken.address}/> :
-          <ERC20TokenUsed contract={contract.hToken} value={amount}/>}
+          }} contract={contract.token} spender={contract.manager.address}/> :
+          <ERC20TokenUsed contract={contract.token} value={amount}/>}
         <p className={classes.proportion}>
           <Checkbox label={'Redeem with all assets proportionally'} initialValue={proportion}
                     onValueChanged={onProportionChanged}/>

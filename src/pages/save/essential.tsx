@@ -65,20 +65,19 @@ export const Essential: React.FC = () => {
 
   useEffect(() => {
     getBalance();
-    contract.saving.getApy().then(setApy);
-    contract.saving.savingsOf(wallet.account).then(v => setWeight(v));
+    contract.savings.getApy().then(setApy);
+    contract.savings.savingsOf(wallet.account).then(v => setWeight(v));
     let weight: BigNumber = new BigNumber(0), totalWeight: BigNumber = new BigNumber(1);
     Promise.all([
-      contract.saving.sharesOf(wallet.account).then(w => weight = w),
-      contract.saving.totalShares().then(w => totalWeight = w),
+      contract.savings.sharesOf(wallet.account).then(w => weight = w),
+      contract.savings.totalShares().then(w => totalWeight = w),
     ]).then(() => {
       setShare(totalWeight.isZero() ? new BigNumber(0) : weight.dividedBy(totalWeight));
     });
   }, [wallet, contract]);
 
   const getBalance = async () => {
-    contract.saving.getTotalBalance().then(v => {
-      console.log(v.toString());
+    contract.savings.savingsOf(wallet.account).then(v => {
       setBalance(v);
     });
   };

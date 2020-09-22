@@ -47,7 +47,7 @@ export const WithdrawForm: React.FC = () => {
   const [estimatedGas, setEstimatedGas] = React.useState<BigNumber>(new BigNumber(0));
 
   useEffect(() => {
-    contract.saving.savingsOf(wallet.account).then(a => {
+    contract.savings.savingsOf(wallet.account).then(a => {
       setBalance(a);
     });
   }, []);
@@ -67,7 +67,7 @@ export const WithdrawForm: React.FC = () => {
     setRequesting(true);
     try {
       const request = await generateRequest();
-      await contract.saving.withdrawRaw(request);
+      await contract.savings.withdrawRaw(request);
     } catch (ex) {
       // TODO: handle exception
       console.error(ex);
@@ -76,13 +76,13 @@ export const WithdrawForm: React.FC = () => {
   };
 
   const generateRequest = async () => {
-    const decimals = await contract.hToken.getDecimals();
+    const decimals = await contract.token.getDecimals();
     return amount.shiftedBy(decimals);
   };
 
   const estimateGas = async () => {
     return generateRequest().then(v => {
-      return contract.saving.estimateWithdrawGas(v).then(v => {
+      return contract.savings.estimateWithdrawGas(v).then(v => {
         console.log(v);
         return setEstimatedGas(v);
       });
@@ -96,7 +96,7 @@ export const WithdrawForm: React.FC = () => {
         <p className={classes.subTitle}>Withdraw hUSD into your wallet.</p>
       </div>
       <div className={classes.form}>
-        <ERC20TokenInput contract={contract.hToken} value={amount} balance={balance} onValueChanged={(v, a) => {
+        <ERC20TokenInput contract={contract.token} value={amount} balance={balance} onValueChanged={(v, a) => {
           setAmount(v);
           setRequesting(!a);
         }}/>
