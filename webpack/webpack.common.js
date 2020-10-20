@@ -50,7 +50,7 @@ class CommonConfiguration {
   }
 
   build() {
-    if (!this.variables.honestConfiguration || !this.variables.honestAssetManager || !this.variables.honestVault) {
+    if (!this.variables.configurationContract || !this.variables.assetManagerContract || !this.variables.vaultContract) {
       throw new Error('Contracts is not completely setup');
     }
     return {
