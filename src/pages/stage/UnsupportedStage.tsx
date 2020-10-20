@@ -5,7 +5,7 @@ export const UnsupportedStage: React.FC = () => {
 
   return (
     <Stage>
-      <p>Please update your MetaMask network.</p>
+      <p>Please switch your MetaMask network.</p>
     </Stage>
   );
 };
