@@ -1,3 +1,3 @@
-export * from './app-bar';
-export * from './frame';
-export * from './stage';
+export * from './AppBar';
+export * from './Frame';
+export * from './Stage';

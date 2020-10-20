@@ -1,1 +1,1 @@
-export * from './redeem';
+export * from './RedeemPage';

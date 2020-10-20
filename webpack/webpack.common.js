@@ -11,12 +11,18 @@ const directories = {
 
 class BuildVariable {
   cdn;
-  puppet;
+  network;
+  configurationContract;
+  assetManagerContract;
+  vaultContract;
 
   constructor(config) {
-    const {cdn, puppet} = config;
+    const {cdn, network, configurationContract, assetManagerContract, vaultContract} = config;
     this.cdn = cdn;
-    this.puppet = puppet;
+    this.network = network;
+    this.configurationContract = configurationContract;
+    this.assetManagerContract = assetManagerContract;
+    this.vaultContract = vaultContract;
   }
 }
 
@@ -32,7 +38,7 @@ class CommonConfiguration {
   }
 
   parseEnvironmentVariables(env) {
-    return new BuildVariable({...env});
+    return new BuildVariable(env);
   }
 
   get plugins() {
@@ -44,6 +50,9 @@ class CommonConfiguration {
   }
 
   build() {
+    if (!this.variables.honestConfiguration || !this.variables.honestAssetManager || !this.variables.honestVault) {
+      throw new Error('Contracts is not completely setup');
+    }
     return {
       entry: {
         app: path.resolve(directories.source, 'index.tsx'),
@@ -74,7 +83,10 @@ class CommonConfiguration {
           template: path.resolve(directories.public, 'index.html')
         }),
         new webpack.DefinePlugin({
-          ENV_PUPPET: JSON.stringify(this.variables.puppet)
+          ENV_NETWORK: Number.parseInt(this.variables.network),
+          ENV_CONFIGURATION_CONTRACT: JSON.stringify(this.variables.configurationContract),
+          ENV_ASSET_MANAGER_CONTRACT: JSON.stringify(this.variables.assetManagerContract),
+          ENV_VAULT_CONTRACT: JSON.stringify(this.variables.vaultContract),
         }),
         ...this.plugins
       ],

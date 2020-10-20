@@ -1,9 +1,19 @@
-const CopyWebpackPlugin = require("copy-webpack-plugin");
-const TerserPlugin = require("terser-webpack-plugin");
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const { directories, BuildVariable, CommonConfiguration } = require("./webpack.common");
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+const {CleanWebpackPlugin} = require('clean-webpack-plugin');
+const {directories, BuildVariable, CommonConfiguration} = require('./webpack.common');
 
 class TestConfiguration extends CommonConfiguration {
+
+  parseEnvironmentVariables(env) {
+    return new BuildVariable({
+      network: '3',
+      configurationContract: '0x397E20C3C3e7c9C2ff805ADD58710Fa9BE9207b8',
+      assetManagerContract: '0x96F2c88017e71dFD83357A2F851D12411F796069',
+      vaultContract: '0xff62852767B2AfdE6F082930f67924F4a23EB80d',
+      ...env
+    });
+  }
 
   get plugins() {
     return [
@@ -14,19 +24,19 @@ class TestConfiguration extends CommonConfiguration {
             from: directories.public,
             to: directories.dist,
             globOptions: {
-              ignore: ["*.html"],
-            },
-          },
-        ],
-      }),
+              ignore: ['*.html']
+            }
+          }
+        ]
+      })
     ];
   }
 
   get configurations() {
     return {
-      mode: "production",
+      mode: 'production',
       performance: {
-        hints: "warning",
+        hints: 'warning'
       },
       optimization: {
         minimize: true,
@@ -34,24 +44,24 @@ class TestConfiguration extends CommonConfiguration {
           new TerserPlugin({
             terserOptions: {
               output: {
-                comments: false,
+                comments: false
               },
               compress: {
-                warnings: false,
-              },
-            },
-          }),
+                warnings: false
+              }
+            }
+          })
         ],
         splitChunks: {
           cacheGroups: {
             commons: {
               test: /[\\/]node_modules[\\/]/,
-              name: "common",
-              chunks: "initial",
-            },
-          },
-        },
-      },
+              name: 'common',
+              chunks: 'initial'
+            }
+          }
+        }
+      }
     };
   }
 }
