@@ -6,9 +6,9 @@ class DevelopmentConfiguration extends CommonConfiguration {
   parseEnvironmentVariables(env) {
     return new BuildVariable({
       network: '-1',
-      configurationContract: '0x397E20C3C3e7c9C2ff805ADD58710Fa9BE9207b8',
-      assetManagerContract: '0x96F2c88017e71dFD83357A2F851D12411F796069',
-      vaultContract: '0xff62852767B2AfdE6F082930f67924F4a23EB80d',
+      configurationContract: '0xdbA4Ae8BB07beeB78C12a84786A98060aF01CAbF',
+      assetManagerContract: '0x48033abD726378E1DcD90562B09941B56Dfc54f1',
+      vaultContract: '0x973993D6f684075B98f88d4f519AFDb20d3De065',
       ...env
     });
   }
