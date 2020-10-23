@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
-import React, {ChangeEvent, FC, useEffect, useRef, useState} from 'react';
+import React, {ChangeEvent, FC, useEffect, useState} from 'react';
 import {createUseStyles} from 'react-jss';
 import {Numbers} from '../../common';
 import {HonestTheme} from '../../config';
@@ -86,20 +86,14 @@ export interface ERC20TokenInputProps extends ERC20TokenComponentProps {
   spender?: string;
 }
 
-enum ApproveStatus {
-  PENDING, PROCESSING, CONFIRMING, REJECTED
-}
-
 export const ERC20TokenInput: FC<ERC20TokenInputProps> = props => {
 
-  const {className, token, disabled, onValueChanged, spender} = props;
+  const {className, token, disabled, onValueChanged} = props;
   const classes = useStyles();
   const ethereum = useEthereum();
 
   const [balance, setBalance] = useState<BigNumber>();
   const [value, setValue] = useState<BigNumber>(new BigNumber(0));
-  const [allowance, setAllowance] = useState<BigNumber>(new BigNumber(0));
-  const [approveStatus, setApproveStatus] = useState<ApproveStatus>(ApproveStatus.PENDING);
 
   useEffect(() => {
     if (!props.balance) {
@@ -110,39 +104,14 @@ export const ERC20TokenInput: FC<ERC20TokenInputProps> = props => {
     setValue(new BigNumber(0));
   }, [ethereum, token, props.balance]);
 
-  const timer = useRef<NodeJS.Timeout>();
-
-  useEffect(() => {
-    timer.current && clearTimeout(timer.current);
-    timer.current = setTimeout(() => {
-      if (spender && value.gt(new BigNumber(0))) {
-        validateAllowance(spender);
-      } else {
-        setAllowance(new BigNumber(0));
-        onValueChanged(value);
-      }
-    }, 500);
-  }, [value, spender, ethereum]);
-
-  const validateAllowance = (spender: string) => {
-    token.contract.allowanceOf(ethereum.account, spender).then(v => {
-      const a = value.minus(v);
-      if (a.gt(new BigNumber(0))) {
-        setAllowance(a);
-        onValueChanged(new BigNumber(0));
-      } else {
-        setAllowance(new BigNumber(0));
-        onValueChanged(value);
-      }
-    });
-  };
-
   const onInputChanged = (e: ChangeEvent<HTMLInputElement>) => {
     if (!balance) {
       return;
     }
     let input = new BigNumber(e.target.value);
-    setValue(input.isNaN() ? new BigNumber(0) : (input.gt(balance) ? value : input));
+    input = input.isNaN() ? new BigNumber(0) : (input.gt(balance) ? value : input);
+    setValue(input);
+    onValueChanged(input);
   };
 
   const onMaxClicked = () => {
@@ -150,22 +119,7 @@ export const ERC20TokenInput: FC<ERC20TokenInputProps> = props => {
       return;
     }
     !disabled && setValue(balance);
-  };
-
-  const onApprove = () => {
-    if (spender) {
-      setApproveStatus(ApproveStatus.PROCESSING);
-      token.contract.approve(spender, value).then(() => {
-        validateAllowance(spender);
-        setApproveStatus(ApproveStatus.CONFIRMING);
-      }).catch(() => {
-        setApproveStatus(ApproveStatus.REJECTED);
-      });
-    }
-  };
-
-  const onReloadAllowance = () => {
-    spender && validateAllowance(spender);
+    onValueChanged(balance);
   };
 
   return (
@@ -178,25 +132,6 @@ export const ERC20TokenInput: FC<ERC20TokenInputProps> = props => {
         <TextButton className={classes.max} onClicked={onMaxClicked}>Max</TextButton>
         <span className={classes.balance}>{balance ? Numbers.format(balance.minus(value)) : '...'}</span>
       </div>
-      {allowance.gt(new BigNumber(0)) && (
-        <div className={classes.allowance}>
-          <span
-            className={classes.approveDescription}>Please approve {Numbers.format(allowance)} {token.symbol} first.</span>
-          {approveStatus === ApproveStatus.PENDING && (
-            <span className={classes.approve}><TextButton onClicked={onApprove}>click to approve</TextButton></span>
-          )}
-          {approveStatus === ApproveStatus.PROCESSING && (
-            <span className={classes.approving}>Approving...</span>
-          )}
-          {approveStatus === ApproveStatus.CONFIRMING && (
-            <span className={classes.confirming}>Confirming...<img src={'/assets/icon/refresh.svg'} alt={'Reload'}
-                                                                   onClick={onReloadAllowance}/></span>
-          )}
-          {approveStatus === ApproveStatus.REJECTED && (
-            <span className={classes.rejected}>Rejected</span>
-          )}
-        </div>
-      )}
     </div>
   );
 };

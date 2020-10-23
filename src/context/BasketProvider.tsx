@@ -1,4 +1,5 @@
-import React, {createContext, FC, useContext, useEffect, useRef, useState} from 'react';
+import BigNumber from 'bignumber.js';
+import React, {createContext, FC, useContext, useEffect, useState} from 'react';
 import {BasketAsset, BasketAssetBalance} from '../common';
 import {HonestVaultContract} from '../contract';
 import {LoadingStage} from '../pages/stage';
@@ -7,8 +8,9 @@ import {useContract} from './index';
 export interface BasketContext {
   contract: HonestVaultContract;
   assets: BasketAsset[];
-  findAsset: (symbol: string) => BasketAsset | undefined;
+  findAsset: (expect: Partial<BasketAsset>) => BasketAsset | undefined;
   balances: BasketAssetBalance[];
+  totalBalance: BigNumber;
   findBalance: (symbol: string) => BasketAssetBalance | undefined;
 }
 
@@ -18,24 +20,33 @@ export const BasketProvider: FC = ({children}) => {
 
   const [assets, setAssets] = useState<BasketAsset[]>();
   const [balances, setBalances] = useState<BasketAssetBalance[]>();
+  const [totalBalance, setTotalBalance] = useState<BigNumber>(new BigNumber(0));
   const contract = useContract();
-  const interval = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
     contract.honestConfiguration.getBasketAssets().then(assets => setAssets(Object.values(assets)));
-    contract.honestVault.getBalances().then(setBalances);
-    interval.current = setInterval(() => {
-      contract.honestVault.getBalances().then(setBalances);
-    }, 3000);
-    return () => {
-      if (interval.current) {
-        clearInterval(interval.current);
-      }
-    };
+    getBalances();
   }, [contract]);
 
-  const findAsset = (symbol: string) => {
-    return assets?.find(a => a.symbol === symbol);
+  const getBalances = async (): Promise<void> => {
+    return await contract.honestVault.getBalances().then(({balances, totalBalance}) => {
+      setBalances(balances);
+      setTotalBalance(totalBalance);
+    });
+  };
+
+  const predicateAsset = (target: BasketAsset, expect: Partial<BasketAsset>): boolean => {
+    for (const key of Object.keys(expect)) {
+      // @ts-ignore
+      if (target[key] !== expect[key]) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const findAsset = (expect: Partial<BasketAsset>): BasketAsset | undefined => {
+    return assets?.find(a => predicateAsset(a, expect));
   };
 
   const findBalance = (symbol: string) => {
@@ -48,7 +59,8 @@ export const BasketProvider: FC = ({children}) => {
       assets: assets,
       findAsset: findAsset,
       balances: balances,
-      findBalance: findBalance,
+      totalBalance: totalBalance,
+      findBalance: findBalance
     }}>{children}</basketContext.Provider>
   ) : <LoadingStage/>;
 };

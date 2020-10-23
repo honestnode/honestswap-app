@@ -10,7 +10,7 @@ import {
   ERC20TokenReceived,
   TransactionButton
 } from '../../components';
-import {useBasket, useContract, useEthereum} from '../../context';
+import {useBasket, useContract, useEthereum, useTerminal} from '../../context';
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
   root: {
@@ -94,6 +94,7 @@ export const SwapPage: React.FC = () => {
   const ethereum = useEthereum();
   const contract = useContract();
   const basket = useBasket();
+  const terminal = useTerminal();
 
   const [tokenFrom, setTokenFrom] = useState<BasketAsset>();
   const [tokenTo, setTokenTo] = useState<BasketAsset>();
@@ -104,7 +105,7 @@ export const SwapPage: React.FC = () => {
 
   useEffect(() => {
     contract.honestConfiguration.getSwapFeeRate().then(feeRate => setFeeRate(feeRate.shiftedBy(-18)));
-  }, []);
+  }, [ethereum]);
 
   React.useEffect(() => {
     setAmount(new BigNumber(0));
@@ -113,9 +114,7 @@ export const SwapPage: React.FC = () => {
 
   useEffect(() => {
     const request = generateTransactionRequest();
-    if (request !== undefined) {
-      setTransactionRequest(request);
-    }
+    setTransactionRequest(request);
   }, [amount]);
 
   const getBalance = async () => {
@@ -141,12 +140,28 @@ export const SwapPage: React.FC = () => {
     return undefined;
   };
 
+  const approve = async (request: SwapRequest): Promise<boolean> => {
+    const allowance = await tokenFrom?.contract.allowanceOf(ethereum.account, contract.honestAssetManager.address);
+    if (allowance && allowance.lt(request.amount)) {
+      terminal.info(`Please approve spending your ${tokenFrom?.name}...`, true);
+      try {
+        await tokenFrom?.contract.approve(contract.honestAssetManager.address, request.amount);
+        terminal.success(`${tokenFrom?.name} spending approved`);
+        return true;
+      } catch (ex) {
+        terminal.error(`User denied ${tokenFrom?.name} spending approve, abort`);
+        return false;
+      }
+    }
+    return true;
+  };
+
   const estimateGas = async (request: SwapRequest): Promise<BigNumber> => {
     return contract.honestAssetManager.estimateSwapGas(request.from, request.to, request.amount);
   };
 
   const execution = async (request: SwapRequest) => {
-    await contract.honestAssetManager.swap(request.from, request.to, request.amount);
+    return await contract.honestAssetManager.swap(request.from, request.to, request.amount);
   };
 
   return (
@@ -169,7 +184,7 @@ export const SwapPage: React.FC = () => {
         {tokenTo && <ERC20TokenReceived amount={getExpectAmount()} token={tokenTo}/>}
       </div>
       <div className={classes.fee}>Swap Fee: {Numbers.format(feeRate, {percentage: true})}</div>
-      <TransactionButton className={classes.action} label={'SWAP'} execution={execution}
+      <TransactionButton className={classes.action} label={'SWAP'} contract={contract.honestAssetManager} approve={approve} execution={execution}
                          request={transactionRequest} calculateGas={estimateGas}/>
       <div className={classes.poolShare}>
         <BasketShares/>

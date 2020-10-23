@@ -11,7 +11,7 @@ export class HonestVaultContract extends EthereumContract {
     super(address, HonestVaultArtifact.abi, provider);
   }
 
-  public async getBalances(): Promise<BasketAssetBalance[]> {
+  public async getBalances(): Promise<{balances: BasketAssetBalance[], totalBalance: BigNumber}> {
     const [assets, balances, totalBalance]: [string[], ethers.BigNumber[], ethers.BigNumber] = await this._handler.balances();
     const result: BasketAssetBalance[] = [];
     for (let i = 0; i < assets.length; ++i) {
@@ -22,7 +22,7 @@ export class HonestVaultContract extends EthereumContract {
         ...asset
       });
     }
-    return result;
+    return {balances: result, totalBalance: new BigNumber(totalBalance.toString())};
   }
 
   public async getWeightOf(account: string): Promise<BigNumber> {

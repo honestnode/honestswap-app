@@ -3,7 +3,7 @@ import {createUseStyles, ThemeProvider} from 'react-jss';
 import {BrowserRouter, Redirect, Route, Switch} from 'react-router-dom';
 import {Frame} from './components/layout';
 import {HonestTheme, routes, theme} from './config';
-import {BasketProvider, ContractProvider, EthereumProvider} from './context';
+import {BasketProvider, ContractProvider, EthereumProvider, TerminalProvider} from './context';
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
   '@global': {
@@ -35,19 +35,21 @@ export const Main: React.FC = () => {
   useStyles();
 
   return (
-    <EthereumProvider>
-      <ContractProvider>
-        <BasketProvider>
-          <BrowserRouter>
-            <Frame navigations={navigations}>
-              <Switch>
-                {routes.map(r => <Route key={r.path} path={r.path} exact={r.exact} component={r.component}/>)}
-                <Redirect to={'/error'}/>
-              </Switch>
-            </Frame>
-          </BrowserRouter>
-        </BasketProvider>
-      </ContractProvider>
-    </EthereumProvider>
+    <TerminalProvider>
+      <EthereumProvider>
+        <ContractProvider>
+          <BasketProvider>
+            <BrowserRouter>
+              <Frame navigations={navigations}>
+                <Switch>
+                  {routes.map(r => <Route key={r.path} path={r.path} exact={r.exact} component={r.component}/>)}
+                  <Redirect to={'/error'}/>
+                </Switch>
+              </Frame>
+            </BrowserRouter>
+          </BasketProvider>
+        </ContractProvider>
+      </EthereumProvider>
+    </TerminalProvider>
   );
 };

@@ -2,7 +2,6 @@ import BigNumber from 'bignumber.js';
 import React, {useEffect, useState} from 'react';
 import {createUseStyles} from 'react-jss';
 import {Numbers} from '../../common';
-import {HonestTheme} from '../../config';
 import {
   BasketExpect,
   BasketReceived,
@@ -12,7 +11,8 @@ import {
   ERC20TokenUsed,
   TransactionButton
 } from '../../components';
-import {useBasket, useContract, useEthereum} from '../../context';
+import {HonestTheme} from '../../config';
+import {useBasket, useContract, useEthereum, useTerminal} from '../../context';
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
   root: {
@@ -85,6 +85,7 @@ export const RedeemPage: React.FC = () => {
   const ethereum = useEthereum();
   const contract = useContract();
   const basket = useBasket();
+  const terminal = useTerminal();
 
   const [balance, setBalance] = React.useState<BigNumber>(new BigNumber(0));
   const [amount, setAmount] = React.useState<BigNumber>(new BigNumber(0));
@@ -96,12 +97,16 @@ export const RedeemPage: React.FC = () => {
   React.useEffect(() => {
     contract.honestAsset.contract.getBalance(ethereum.account).then(setBalance);
     contract.honestConfiguration.getRedeemFeeRate().then(feeRate => setFeeRate(feeRate.shiftedBy(-18)));
+    setTokenAmounts({});
+    setAmount(new BigNumber(0));
   }, [contract, ethereum, basket]);
 
   useEffect(() => {
     if (amount.gt(new BigNumber(0))) {
       const request = generateTransactionRequest();
       setTransactionRequest(request);
+    } else {
+      setTransactionRequest(undefined);
     }
   }, [amount]);
 
@@ -125,7 +130,7 @@ export const RedeemPage: React.FC = () => {
       for (const symbol of Object.keys(tokenAmounts)) {
         const amount = tokenAmounts[symbol];
         if (amount.gt(new BigNumber(0))) {
-          const token = basket.findAsset(symbol);
+          const token = basket.findAsset({symbol: symbol});
           if (token) {
             request[token.address] = amount.shiftedBy(token.decimals);
           }
@@ -133,6 +138,23 @@ export const RedeemPage: React.FC = () => {
       }
       return request;
     }
+  };
+
+  const approve = async (): Promise<boolean> => {
+    const amountToApprove = amount.shiftedBy(contract.honestAsset.decimals);
+    const allowance = await contract.honestAsset.contract.allowanceOf(ethereum.account, contract.honestAssetManager.address);
+    if (allowance && allowance.lt(amountToApprove)) {
+      terminal.info(`Please approve spending your ${contract.honestAsset.name}...`, true);
+      try {
+        await contract.honestAsset.contract.approve(contract.honestAssetManager.address, amountToApprove);
+        terminal.success(`${contract.honestAsset.name} spending approved`);
+        return true;
+      } catch (ex) {
+        terminal.error(`User denied ${contract.honestAsset.name} spending approve, abort`);
+        return false;
+      }
+    }
+    return true;
   };
 
   const estimateGas = async (request: BigNumber | Record<string, BigNumber>) => {
@@ -177,7 +199,8 @@ export const RedeemPage: React.FC = () => {
           </>
         }
       </div>
-      <TransactionButton className={classes.action} label={'REDEEM hUSD'} execution={execution}
+      <TransactionButton className={classes.action} label={'REDEEM hUSD'} contract={contract.honestAssetManager}
+                         approve={approve} execution={execution}
                          request={transactionRequest} calculateGas={estimateGas}/>
       <div className={classes.poolShare}>
         <BasketShares/>

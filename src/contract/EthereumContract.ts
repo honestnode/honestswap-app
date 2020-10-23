@@ -1,3 +1,4 @@
+import {TransactionReceipt} from '@ethersproject/abstract-provider';
 import {ContractInterface} from '@ethersproject/contracts';
 import BigNumber from 'bignumber.js';
 import {ethers} from 'ethers';
@@ -25,9 +26,13 @@ export abstract class EthereumContract {
     return this._address;
   }
 
-  public async estimateGas(method: string, ...args: Array<any>) : Promise<BigNumber> {
+  public async estimateGas(method: string, ...args: Array<any>): Promise<BigNumber> {
     const price = await this._provider.getGasPrice();
     const result: Promise<ethers.BigNumber> = this._handler.estimateGas[method](...args);
     return result.then(a => new BigNumber(a.mul(price).toString()).shiftedBy(-18));
+  }
+
+  public async waitForConfirmation(tx: string): Promise<TransactionReceipt> {
+    return this._provider.waitForTransaction(tx, 1);
   }
 }

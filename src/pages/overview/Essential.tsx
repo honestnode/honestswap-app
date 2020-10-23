@@ -1,9 +1,9 @@
 import BigNumber from 'bignumber.js';
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {createUseStyles} from 'react-jss';
 import {Numbers} from '../../common';
 import {HonestTheme} from '../../config';
-import {useContract} from '../../context';
+import {useBasket} from '../../context';
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
   root: {
@@ -31,19 +31,14 @@ export const Essential: React.FC = () => {
 
   const classes = useStyles();
   const [apy] = useState<BigNumber>(new BigNumber(0));
-  const [supply, setSupply] = useState<BigNumber>(new BigNumber(0));
 
-  const contract = useContract();
-
-  useEffect(() => {
-    contract.honestAsset.contract.getTotalSupply().then(setSupply);
-  }, [contract]);
+  const basket = useBasket();
 
   return (
     <div className={classes.root}>
       <div className={classes.section}>
         <span className={classes.leading}>Total hUSD supply</span>
-        <span className={classes.value}>{Numbers.format(supply)}</span>
+        <span className={classes.value}>{Numbers.format(basket.totalBalance.shiftedBy(-18))}</span>
       </div>
       <div className={classes.section}>
         <span className={classes.leading}>APY</span>

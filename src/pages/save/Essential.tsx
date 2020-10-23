@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {createUseStyles} from 'react-jss';
 import {Numbers} from '../../common';
 import {HonestTheme} from '../../config';
@@ -58,7 +58,6 @@ export const Essential: React.FC = () => {
   const contract = useContract();
   const ethereum = useEthereum();
 
-  const interval = useRef<NodeJS.Timeout>();
   const [balance, setBalance] = useState<BigNumber>(new BigNumber(0));
   const [apy] = useState<BigNumber>(new BigNumber(0));
   const [weight, setWeight] = useState<BigNumber>(new BigNumber(0));
@@ -68,16 +67,6 @@ export const Essential: React.FC = () => {
     getBalance().then(setBalance);
     getWeight().then(setWeight);
     getTotalWeight().then(setTotalWeight);
-    interval.current = setInterval(() => {
-      getBalance().then(setBalance);
-      getWeight().then(setWeight);
-      getTotalWeight().then(setTotalWeight);
-    }, 3000);
-    return () => {
-      if (interval.current) {
-        clearInterval(interval.current);
-      }
-    };
   }, [ethereum, contract]);
 
   const getBalance = async (): Promise<BigNumber> => {

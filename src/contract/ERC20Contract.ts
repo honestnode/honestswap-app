@@ -27,11 +27,6 @@ export class ERC20Contract extends EthereumContract {
     return this._handler.symbol();
   }
 
-  public async getIcon(): Promise<string> {
-    const symbol = await this.getSymbol();
-    return `/assets/icon/${symbol.toLowerCase()}.svg`;
-  }
-
   public getDecimals(): Promise<number> {
     if (this._decimals !== undefined) {
       return Promise.resolve(this._decimals);
@@ -52,13 +47,11 @@ export class ERC20Contract extends EthereumContract {
   }
 
   public async approve(spender: string, amount: BigNumber): Promise<boolean> {
-    const decimals = await this.getDecimals();
-    return this._handler.approve(spender, ethers.BigNumber.from(amount.shiftedBy(decimals).toString()));
+    return this._handler.approve(spender, ethers.BigNumber.from(amount.toString()));
   }
 
   public async allowanceOf(owner: string, spender: string): Promise<BigNumber> {
-    const decimals = await this.getDecimals();
     const result: Promise<ethers.BigNumber> = this._handler.allowance(owner, spender);
-    return result.then(n => new BigNumber(n.toString()).shiftedBy(-decimals));
+    return result.then(n => new BigNumber(n.toString()));
   }
 }

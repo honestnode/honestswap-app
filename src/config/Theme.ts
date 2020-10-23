@@ -15,6 +15,7 @@ export interface HonestPalette {
   textLighter: string;
   textWhite: string;
   token: (name: string) => string;
+  success: string;
   warning: string;
   error: string;
 }
@@ -37,8 +38,9 @@ export const theme: HonestTheme = {
     text: '#909090',
     textLighter: '#b0b0b0',
     textWhite: '#f0f0f0',
-    warning: '#ff9966',
-    error: '#cc3300',
+    success: '#4caf50',
+    warning: '#ff9800',
+    error: '#f44336',
     token: name => {
       const themed: Record<string, string> = {
         husd: '#f0f0f0',

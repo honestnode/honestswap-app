@@ -5,7 +5,7 @@ import {Numbers} from '../../common';
 import {HonestTheme} from '../../config';
 import {ERC20TokenReceived, TransactionButton} from '../../components';
 import {BasketInput, BasketShares} from '../../components/basket';
-import {useBasket, useContract, useEthereum} from '../../context';
+import {useBasket, useContract, useEthereum, useTerminal} from '../../context';
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
   root: {
@@ -91,21 +91,26 @@ export const MintPage: React.FC = () => {
   const contract = useContract();
   const ethereum = useEthereum();
   const basket = useBasket();
+  const terminal = useTerminal();
 
   const [balance, setBalance] = React.useState<BigNumber>(new BigNumber(0));
-
   const [values, setValues] = React.useState<Record<string, BigNumber>>({});
   const [totalValue, setTotalValue] = React.useState<BigNumber>(new BigNumber(0));
   const [transactionRequest, setTransactionRequest] = React.useState<Record<string, BigNumber>>();
 
   React.useEffect(() => {
     contract.honestAsset.contract.getBalance(ethereum.account).then(setBalance);
+    setValues({});
+    setTotalValue(new BigNumber(0));
+    setTransactionRequest(undefined);
   }, [contract, ethereum]);
 
   React.useEffect(() => {
     const request = generateTransactionRequest();
     if (Object.entries(request).length > 0) {
       setTransactionRequest(request);
+    } else {
+      setTransactionRequest(undefined);
     }
   }, [values]);
 
@@ -118,12 +123,12 @@ export const MintPage: React.FC = () => {
     setValues(values);
   };
 
-  const generateTransactionRequest = () => {
+  const generateTransactionRequest = () : Record<string, BigNumber> => {
     const request: Record<string, BigNumber> = {};
     for (const symbol of Object.keys(values)) {
       const amount = values[symbol];
       if (amount.gt(new BigNumber(0))) {
-        const token = basket.findAsset(symbol);
+        const token = basket.findAsset({symbol: symbol});
         if (token) {
           request[token.address] = amount.shiftedBy(token.decimals);
         }
@@ -132,12 +137,30 @@ export const MintPage: React.FC = () => {
     return request;
   };
 
+  const approve = async (request: Record<string, BigNumber>): Promise<boolean> => {
+    for(const [asset, amount] of Object.entries(request)) {
+      const token = basket.findAsset({address: asset});
+      const allowance = await token?.contract.allowanceOf(ethereum.account, contract.honestAssetManager.address);
+      if (allowance && allowance.lt(amount)) {
+        terminal.info(`Please approve spending your ${token?.name}...`, true);
+        try {
+          await token?.contract.approve(contract.honestAssetManager.address, amount);
+          terminal.success(`${token?.name} spending approved`);
+        } catch (ex) {
+          terminal.error(`User denied ${token?.name} spending approve, abort`);
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+
   const estimateGas = async (request: Record<string, BigNumber>) => {
     return contract.honestAssetManager.estimateMintGas(request);
   }
 
   const execution = async (request: Record<string, BigNumber>) => {
-    await contract.honestAssetManager.mint(request);
+    return await contract.honestAssetManager.mint(request);
   };
 
   return (
@@ -161,7 +184,7 @@ export const MintPage: React.FC = () => {
           className={classes.summaryAmount}>{Numbers.format(balance.plus(totalValue))}</span><span
           className={classes.summaryUnit}>hUSD</span></p>
       </div>
-      <TransactionButton className={classes.action} label={'MINT hUSD'} execution={execution} request={transactionRequest} calculateGas={estimateGas} />
+      <TransactionButton className={classes.action} label={'MINT hUSD'} contract={contract.honestAssetManager} approve={approve} execution={execution} request={transactionRequest} calculateGas={estimateGas} />
       <div className={classes.poolShare}>
         <BasketShares/>
       </div>

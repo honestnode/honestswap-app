@@ -46,7 +46,7 @@ export const WithdrawForm: React.FC = () => {
 
   useEffect(() => {
     contract.honestVault.getWeightOf(ethereum.account).then(weight => setBalance(weight.shiftedBy(-18)));
-  }, []);
+  }, [ethereum]);
 
   useEffect(() => {
     if (amount.gt(new BigNumber(0))) {
@@ -64,7 +64,7 @@ export const WithdrawForm: React.FC = () => {
   };
 
   const execution = async (request: BigNumber) => {
-    await contract.honestAssetManager.withdraw(request);
+    return await contract.honestAssetManager.withdraw(request);
   };
 
   return (
@@ -76,7 +76,7 @@ export const WithdrawForm: React.FC = () => {
       <div className={classes.form}>
         <ERC20TokenInput token={contract.honestAsset} balance={balance} onValueChanged={setAmount}/>
       </div>
-      <TransactionButton className={classes.action} label={'Withdraw hUSD'} execution={execution}
+      <TransactionButton className={classes.action} label={'Withdraw hUSD'} contract={contract.honestAssetManager} execution={execution}
                          request={transactionRequest} calculateGas={estimateGas}/>
     </div>
   );

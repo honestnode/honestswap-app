@@ -14,6 +14,8 @@ export interface EthereumContextProps {
   provider: ethers.providers.Web3Provider;
   chainId: number;
   account: string;
+  version: number;
+  refresh: () => void;
 }
 
 const EthereumContext = createContext<EthereumContextProps>({} as never);
@@ -23,6 +25,7 @@ export const EthereumProvider: React.FC = ({children}) => {
   const [state, setState] = useState<ProviderState>();
   const [account, setAccount] = useState<string>('');
   const [chainId, setChainId] = useState<number>(-1);
+  const [version, setVersion] = useState<number>(0);
 
   if (!(window.ethereum && window.ethereum.isMetaMask)) {
     return <UnavailableStage/>;
@@ -67,6 +70,10 @@ export const EthereumProvider: React.FC = ({children}) => {
     });
   };
 
+  const refresh = () => {
+    setVersion(version => version + 1);
+  };
+
   useEffect(() => {
     getWallet().then(accounts => {
       onAccountsChanged(accounts);
@@ -92,10 +99,12 @@ export const EthereumProvider: React.FC = ({children}) => {
       return <ConnectingStage/>;
     case ProviderState.CONNECTED:
       return <EthereumContext.Provider value={{
+        version: version,
         state: state,
         provider: provider,
         account: account,
-        chainId: chainId
+        chainId: chainId,
+        refresh
       }}>{children}</EthereumContext.Provider>;
     case ProviderState.UNSUPPORTED:
       return <UnsupportedStage />;
