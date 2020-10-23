@@ -62,8 +62,11 @@ export const SaveForm: React.FC = () => {
     if (allowance && allowance.lt(request)) {
       terminal.info(`Please approve spending your ${contract.honestAsset.name}...`, true);
       try {
-        await contract.honestAsset.contract.approve(contract.honestAssetManager.address, request);
-        terminal.success(`${contract.honestAsset.name} spending approved`);
+        const tx = await contract.honestAsset.contract.approve(contract.honestAssetManager.address, request);
+        terminal.success(`Submitted ${contract.honestAsset.name} spending approve`);
+        terminal.info(`Waiting for approve confirmation...`, true);
+        await contract.honestAsset.contract.waitForConfirmation(tx.hash);
+        terminal.success(`Approve confirmed`);
         return true;
       } catch (ex) {
         terminal.error(`User denied ${contract.honestAsset.name} spending approve, abort`);

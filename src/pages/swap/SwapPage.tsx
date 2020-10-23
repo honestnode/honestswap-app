@@ -141,15 +141,21 @@ export const SwapPage: React.FC = () => {
   };
 
   const approve = async (request: SwapRequest): Promise<boolean> => {
-    const allowance = await tokenFrom?.contract.allowanceOf(ethereum.account, contract.honestAssetManager.address);
+    if (!tokenFrom) {
+      return false;
+    }
+    const allowance = await tokenFrom.contract.allowanceOf(ethereum.account, contract.honestAssetManager.address);
     if (allowance && allowance.lt(request.amount)) {
-      terminal.info(`Please approve spending your ${tokenFrom?.name}...`, true);
+      terminal.info(`Please approve spending your ${tokenFrom.name}...`, true);
       try {
-        await tokenFrom?.contract.approve(contract.honestAssetManager.address, request.amount);
-        terminal.success(`${tokenFrom?.name} spending approved`);
+        const tx = await tokenFrom.contract.approve(contract.honestAssetManager.address, request.amount);
+        terminal.success(`Submitted ${tokenFrom.name} spending approve`);
+        terminal.info(`Waiting for approve confirmation...`, true);
+        await tokenFrom.contract.waitForConfirmation(tx.hash);
+        terminal.success(`Approve confirmed`);
         return true;
       } catch (ex) {
-        terminal.error(`User denied ${tokenFrom?.name} spending approve, abort`);
+        terminal.error(`User denied ${tokenFrom.name} spending approve, abort`);
         return false;
       }
     }

@@ -63,6 +63,7 @@ export const BasketInput: FC<BasketInputProps> = props => {
 
   return (
     <div className={clsx(classes.root, className)}>
+      <div style={{display: 'flex'}}><span style={{flex: 'auto'}}></span><span style={{flex: '0 0 180px'}}>Your balance</span></div>
       {Object.values(basket.assets).map(token =>
         <div className={classes.token} key={token.symbol}>
           <ERC20TokenInput className={classes.item} token={token}

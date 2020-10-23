@@ -62,7 +62,7 @@ export const TransactionButton: FC<TransactionButtonProps> = props => {
         terminal.success(`Transaction submitted: ${tx.hash}`);
         terminal.info('Waiting for the confirmation...', true);
         await contract.waitForConfirmation(tx.hash);
-        terminal.success('Transaction execution confirmed');
+        terminal.success('Transaction confirmed');
         ethereum.refresh();
       } catch (ex) {
         console.log(ex);

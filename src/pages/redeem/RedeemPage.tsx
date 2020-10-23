@@ -146,8 +146,11 @@ export const RedeemPage: React.FC = () => {
     if (allowance && allowance.lt(amountToApprove)) {
       terminal.info(`Please approve spending your ${contract.honestAsset.name}...`, true);
       try {
-        await contract.honestAsset.contract.approve(contract.honestAssetManager.address, amountToApprove);
-        terminal.success(`${contract.honestAsset.name} spending approved`);
+        const tx = await contract.honestAsset.contract.approve(contract.honestAssetManager.address, amountToApprove);
+        terminal.success(`Submitted ${contract.honestAsset.name} spending approve`);
+        terminal.info(`Waiting for approve confirmation...`, true);
+        await contract.honestAsset.contract.waitForConfirmation(tx.hash);
+        terminal.success(`Approve confirmed`);
         return true;
       } catch (ex) {
         terminal.error(`User denied ${contract.honestAsset.name} spending approve, abort`);

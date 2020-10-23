@@ -2,6 +2,7 @@ import BigNumber from 'bignumber.js';
 import {ethers} from 'ethers';
 import {EthereumContract, EthereumContractInterface, EthereumContractProvider} from './EthereumContract';
 import * as ERC20Artifact from '../artifacts/ERC20.json';
+import {TransactionResponse} from '@ethersproject/abstract-provider';
 
 export class ERC20Contract extends EthereumContract {
 
@@ -46,7 +47,7 @@ export class ERC20Contract extends EthereumContract {
     return result.then(n => new BigNumber(n.toString()).shiftedBy(-decimals));
   }
 
-  public async approve(spender: string, amount: BigNumber): Promise<boolean> {
+  public async approve(spender: string, amount: BigNumber): Promise<TransactionResponse> {
     return this._handler.approve(spender, ethers.BigNumber.from(amount.toString()));
   }
 

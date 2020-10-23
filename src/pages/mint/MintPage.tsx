@@ -6,6 +6,7 @@ import {HonestTheme} from '../../config';
 import {ERC20TokenReceived, TransactionButton} from '../../components';
 import {BasketInput, BasketShares} from '../../components/basket';
 import {useBasket, useContract, useEthereum, useTerminal} from '../../context';
+import {ERC20Contract} from '../../contract';
 
 const useStyles = createUseStyles<HonestTheme>(theme => ({
   root: {
@@ -138,19 +139,29 @@ export const MintPage: React.FC = () => {
   };
 
   const approve = async (request: Record<string, BigNumber>): Promise<boolean> => {
+    const txs: {contract: ERC20Contract, tx: string}[] = [];
     for(const [asset, amount] of Object.entries(request)) {
       const token = basket.findAsset({address: asset});
-      const allowance = await token?.contract.allowanceOf(ethereum.account, contract.honestAssetManager.address);
+      if (!token) {
+        continue;
+      }
+      const allowance = await token.contract.allowanceOf(ethereum.account, contract.honestAssetManager.address);
       if (allowance && allowance.lt(amount)) {
-        terminal.info(`Please approve spending your ${token?.name}...`, true);
+        terminal.info(`Please approve spending your ${token.name}...`, true);
         try {
-          await token?.contract.approve(contract.honestAssetManager.address, amount);
-          terminal.success(`${token?.name} spending approved`);
+          const tx = await token.contract.approve(contract.honestAssetManager.address, amount);
+          terminal.success(`${token.name} spending approved`);
+          txs.push({contract: token.contract, tx: tx.hash});
         } catch (ex) {
-          terminal.error(`User denied ${token?.name} spending approve, abort`);
+          terminal.error(`User denied ${token.name} spending approve, abort`);
           return false;
         }
       }
+    }
+    if (txs.length > 0) {
+      terminal.info(`Waiting for approve confirmation...`, true);
+      await Promise.all(txs.map(({contract, tx}) => contract.waitForConfirmation(tx)));
+      terminal.success(`Approve confirmed`);
     }
     return true;
   };
