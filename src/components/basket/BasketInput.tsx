@@ -1,9 +1,9 @@
 import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
-import React, {FC, useState} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import {createUseStyles} from 'react-jss';
 import {HonestTheme} from '../../config';
-import {useBasket} from '../../context';
+import {useBasket, useEthereum} from '../../context';
 import {ComponentProps} from '../CommonComponent';
 import {ERC20TokenInput} from '../token';
 
@@ -37,12 +37,17 @@ export const BasketInput: FC<BasketInputProps> = props => {
 
   const {className, onValuesChanged, spender} = props;
   const classes = useStyles();
+  const ethereum = useEthereum();
   const basket = useBasket();
 
   const [values, setValues] = useState<Record<string, BigNumber>>(
     basket.assets.reduce((m, t) => ({...m, [t.symbol]: new BigNumber(0)}), {})
   );
   const [bonuses] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    setValues(basket.assets.reduce((m, t) => ({...m, [t.symbol]: new BigNumber(0)}), {}));
+  }, [ethereum, basket]);
 
   // useEffect(() => {
   //   const b:Record<string, boolean> = {};

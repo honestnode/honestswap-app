@@ -2,9 +2,9 @@ import BigNumber from 'bignumber.js';
 import React from 'react';
 import {createUseStyles} from 'react-jss';
 import {Numbers} from '../../common';
-import {HonestTheme} from '../../config';
 import {ERC20TokenReceived, TransactionButton} from '../../components';
 import {BasketInput, BasketShares} from '../../components/basket';
+import {HonestTheme} from '../../config';
 import {useBasket, useContract, useEthereum, useTerminal} from '../../context';
 import {ERC20Contract} from '../../contract';
 
@@ -124,7 +124,7 @@ export const MintPage: React.FC = () => {
     setValues(values);
   };
 
-  const generateTransactionRequest = () : Record<string, BigNumber> => {
+  const generateTransactionRequest = (): Record<string, BigNumber> => {
     const request: Record<string, BigNumber> = {};
     for (const symbol of Object.keys(values)) {
       const amount = values[symbol];
@@ -140,7 +140,7 @@ export const MintPage: React.FC = () => {
 
   const approve = async (request: Record<string, BigNumber>): Promise<boolean> => {
     const txs: {contract: ERC20Contract, tx: string}[] = [];
-    for(const [asset, amount] of Object.entries(request)) {
+    for (const [asset, amount] of Object.entries(request)) {
       const token = basket.findAsset({address: asset});
       if (!token) {
         continue;
@@ -168,7 +168,7 @@ export const MintPage: React.FC = () => {
 
   const estimateGas = async (request: Record<string, BigNumber>) => {
     return contract.honestAssetManager.estimateMintGas(request);
-  }
+  };
 
   const execution = async (request: Record<string, BigNumber>) => {
     return await contract.honestAssetManager.mint(request);
@@ -195,7 +195,9 @@ export const MintPage: React.FC = () => {
           className={classes.summaryAmount}>{Numbers.format(balance.plus(totalValue))}</span><span
           className={classes.summaryUnit}>hUSD</span></p>
       </div>
-      <TransactionButton className={classes.action} label={'MINT hUSD'} contract={contract.honestAssetManager} approve={approve} execution={execution} request={transactionRequest} calculateGas={estimateGas} />
+      <TransactionButton className={classes.action} label={'MINT hUSD'} contract={contract.honestAssetManager}
+                         approve={approve} execution={execution} request={transactionRequest}
+                         calculateGas={estimateGas}/>
       <div className={classes.poolShare}>
         <BasketShares/>
       </div>

@@ -96,7 +96,7 @@ const TerminalContext = createContext<TerminalContextProps>({} as never);
 export const TerminalProvider: FC = props => {
 
   const classes = useStyles();
-  const timer = useRef<NodeJS.Timeout>();
+  // const timer = useRef<NodeJS.Timeout>();
   const consoleBottom = useRef<HTMLDivElement>(null);
   const [shown, setShown] = useState<boolean>(false);
   const [logs, setLogs] = useState<Log[]>([]);
@@ -113,11 +113,11 @@ export const TerminalProvider: FC = props => {
   const log = (level: LogLevel, message: string, processing: boolean = false) => {
     setShown(true);
     setLogs(logs => [...logs, {level: level, message: message, processing: processing}]);
-    if (!processing) {
-      timer.current = setTimeout(close, level === 'error' ? 8000 : 5000);
-    } else {
-      timer.current && clearTimeout(timer.current);
-    }
+    // if (!processing) {
+    //   timer.current = setTimeout(close, level === 'error' ? 8000 : 5000);
+    // } else {
+    //   timer.current && clearTimeout(timer.current);
+    // }
   };
 
   const info = (message: string, processing?: boolean) => log('info', message, processing);
