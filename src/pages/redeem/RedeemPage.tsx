@@ -197,7 +197,7 @@ export const RedeemPage: React.FC = () => {
         {proportion ?
           <BasketReceived amount={amount} onAmountsChanged={setTokenAmounts}/> :
           <>
-            <BasketExpect amount={balance} onAmountsChanged={onAmountsChanged}/>
+            <BasketExpect amount={balance.multipliedBy(new BigNumber(1).minus(feeRate))} onAmountsChanged={onAmountsChanged}/>
             <p className={classes.fee}>Redeem Fee: {Numbers.format(feeRate, {percentage: true})}</p>
           </>
         }
